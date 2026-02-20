@@ -45,6 +45,7 @@ export interface Translations {
         cta: string;
         features: string[];
     };
+    paymentError: string;
     faq: {
         title: string;
         items: {
@@ -114,6 +115,7 @@ export const translations: Record<Locale, Translations> = {
                 'Action Recommendations',
             ],
         },
+        paymentError: 'Payment initialization failed. Please try again later.',
         faq: {
             title: 'Frequently Asked Questions',
             items: [
@@ -195,6 +197,7 @@ export const translations: Record<Locale, Translations> = {
                 '行动建议',
             ],
         },
+        paymentError: '支付初始化失败，请稍后再试。',
         faq: {
             title: '常见问题',
             items: [
@@ -276,6 +279,7 @@ export const translations: Record<Locale, Translations> = {
                 '行動建議',
             ],
         },
+        paymentError: '支付初始化失敗，請稍後再試。',
         faq: {
             title: '常見問題',
             items: [

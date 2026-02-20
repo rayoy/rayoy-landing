@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import Logo from './Logo';
+import Link from 'next/link';
+import Logo from '@/components/Logo';
 import { useLanguage } from '@/lib/LanguageContext';
 import type { Locale } from '@/lib/i18n';
+import { legalTranslations } from '@/lib/legal-i18n';
 
 const localeLabels: { locale: Locale; label: string }[] = [
     { locale: 'en', label: 'English' },
@@ -11,10 +13,12 @@ const localeLabels: { locale: Locale; label: string }[] = [
     { locale: 'zh-TW', label: '繁體中文' },
 ];
 
-export default function Navbar() {
-    const { locale, setLocale, t } = useLanguage();
+export default function LegalHeader() {
+    const { locale, setLocale } = useLanguage();
     const [isLangOpen, setIsLangOpen] = useState(false);
     const langRef = useRef<HTMLDivElement>(null);
+
+    const t = legalTranslations[locale].nav;
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -28,39 +32,15 @@ export default function Navbar() {
     }, []);
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 border-b border-brand-border/50 bg-brand-dark/80 backdrop-blur-md">
-            <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-                {/* Left: Logo + Brand */}
-                <a href="#" className="flex items-center gap-2.5 group">
-                    <Logo />
-                    <span className="text-lg font-semibold tracking-tight text-brand-text transition-colors group-hover:text-brand-accent">
-                        Rayoy
-                    </span>
-                </a>
+        <header className="border-b border-brand-border/50 bg-brand-dark">
+            <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-6">
+                <Link href="/" className="flex items-center gap-2 group text-brand-muted hover:text-brand-text transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m15 18-6-6 6-6" />
+                    </svg>
+                    <span className="text-sm font-medium">{t.back}</span>
+                </Link>
 
-                {/* Center: Nav links (hidden on mobile) */}
-                <div className="hidden items-center gap-8 md:flex">
-                    <a
-                        href="#method"
-                        className="text-sm text-brand-muted transition-colors hover:text-brand-text"
-                    >
-                        {t.nav.method}
-                    </a>
-                    <a
-                        href="#report"
-                        className="text-sm text-brand-muted transition-colors hover:text-brand-text"
-                    >
-                        {t.nav.report}
-                    </a>
-                    <a
-                        href="#faq"
-                        className="text-sm text-brand-muted transition-colors hover:text-brand-text"
-                    >
-                        {t.nav.faq}
-                    </a>
-                </div>
-
-                {/* Right: Language switcher + CTA */}
                 <div className="flex items-center gap-4">
                     {/* Globe Dropdown */}
                     <div className="relative flex items-center" ref={langRef}>
@@ -88,7 +68,7 @@ export default function Navbar() {
 
                         {/* Dropdown Menu */}
                         {isLangOpen && (
-                            <div className="absolute right-0 top-full mt-2 w-40 origin-top-right rounded-md border border-brand-border bg-brand-card py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none animate-in fade-in zoom-in-95 duration-200">
+                            <div className="absolute right-0 top-full mt-2 w-40 origin-top-right rounded-md border border-brand-border bg-brand-card py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none animate-in fade-in zoom-in-95 duration-200 z-50">
                                 {localeLabels.map(({ locale: loc, label }) => (
                                     <button
                                         key={loc}
@@ -112,15 +92,8 @@ export default function Navbar() {
                             </div>
                         )}
                     </div>
-
-                    <a
-                        href="#pricing"
-                        className="rounded-md bg-brand-accent px-4 py-2 text-sm font-medium text-brand-dark transition-colors hover:bg-brand-accent-hover hidden sm:block"
-                    >
-                        {t.nav.getReport}
-                    </a>
                 </div>
             </div>
-        </nav>
+        </header>
     );
 }

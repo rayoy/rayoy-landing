@@ -40,8 +40,8 @@ export default function Solution() {
     const rp = t.solution.reportPreview;
 
     return (
-        <section id="report" className="px-6 py-24 sm:py-32">
-            <div className="mx-auto max-w-6xl">
+        <section id="report" className="px-6 py-24 sm:py-32 relative">
+            <div className="mx-auto max-w-6xl relative z-10">
                 <h2 className="text-center text-2xl font-semibold tracking-tight text-brand-text sm:text-3xl md:text-4xl">
                     {t.solution.title}
                 </h2>
@@ -51,10 +51,10 @@ export default function Solution() {
                     {features.map((f, i) => (
                         <div
                             key={i}
-                            className="flex items-start gap-4 rounded-lg border border-brand-border bg-brand-card/30 p-6 transition-all hover:border-brand-accent/30 hover:bg-brand-card/60"
+                            className="group flex items-start gap-4 rounded-lg border border-brand-border bg-brand-card/30 p-6 transition-all duration-300 hover:border-brand-accent/50 hover:bg-brand-card/80 hover:shadow-[0_0_15px_rgba(45,212,191,0.1)] hover:-translate-y-1"
                         >
-                            <div className="shrink-0">{f.icon}</div>
-                            <span className="text-sm font-medium text-brand-text">
+                            <div className="shrink-0 transition-transform duration-300 group-hover:scale-110">{f.icon}</div>
+                            <span className="text-sm font-medium text-brand-text transition-colors group-hover:text-brand-accent">
                                 {f.label}
                             </span>
                         </div>
@@ -62,74 +62,93 @@ export default function Solution() {
                 </div>
 
                 {/* Report preview card */}
-                <div className="mx-auto mt-16 max-w-lg rounded-xl border border-brand-border bg-brand-card/40 p-8">
-                    <div className="mb-6 flex items-center justify-between">
-                        <h3 className="text-sm font-medium text-brand-muted">
-                            {rp.title}
-                        </h3>
-                        <div className="h-2 w-2 rounded-full bg-brand-accent animate-pulse" />
-                    </div>
+                <div className="mx-auto mt-20 max-w-lg relative group">
+                    {/* Background glow effect */}
+                    <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-brand-accent/0 via-brand-accent/10 to-brand-accent/0 opacity-0 blur-xl transition-opacity duration-1000 group-hover:opacity-100" />
 
-                    <div className="space-y-5">
-                        {/* Phase */}
-                        <div>
-                            <p className="text-xs uppercase tracking-widest text-brand-muted">
-                                {rp.phaseLabel}
-                            </p>
-                            <p className="mt-1 text-xl font-semibold text-brand-accent">
-                                {rp.currentPhase}
-                            </p>
+                    <div className="relative rounded-xl border border-brand-border bg-[#0D1322] p-8 shadow-2xl overflow-hidden transition-all duration-500 hover:border-brand-accent/30">
+
+                        {/* AI Scanline Animation */}
+                        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                            <div className="w-full h-[2px] bg-brand-accent/50 shadow-[0_0_8px_2px_rgba(45,212,191,0.4)] animate-scan" />
                         </div>
 
-                        <div className="h-px bg-brand-border" />
-
-                        {/* Trend */}
-                        <div>
-                            <p className="text-xs uppercase tracking-widest text-brand-muted">
-                                {rp.trendLabel}
-                            </p>
-                            <p className="mt-1 text-sm text-brand-text">
-                                {rp.trendValue}
-                            </p>
-                            {/* Mini bar chart visualization */}
-                            <div className="mt-3 flex items-end gap-1">
-                                {[40, 55, 45, 60, 70, 65, 80, 85, 90].map((h, i) => (
-                                    <div
-                                        key={i}
-                                        className="w-5 rounded-sm bg-brand-accent/20 transition-all hover:bg-brand-accent/40"
-                                        style={{ height: `${h}%`, minHeight: `${h * 0.5}px` }}
-                                    />
-                                ))}
+                        <div className="relative z-10">
+                            <div className="mb-6 flex items-center justify-between border-b border-brand-border/50 pb-4">
+                                <div className="flex items-center gap-2">
+                                    <svg className="w-4 h-4 text-brand-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                    </svg>
+                                    <h3 className="text-sm font-medium tracking-wide text-brand-text">
+                                        {rp.title}
+                                    </h3>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] text-brand-accent uppercase tracking-widest font-mono">Live Sync</span>
+                                    <div className="h-2 w-2 rounded-full bg-brand-accent animate-[pulse_1.5s_ease-in-out_infinite] shadow-[0_0_5px_rgba(45,212,191,0.8)]" />
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="h-px bg-brand-border" />
+                            <div className="space-y-6">
+                                {/* Phase */}
+                                <div className="group/item rounded-lg bg-brand-card/20 p-4 transition-colors hover:bg-brand-card/40 border border-transparent hover:border-brand-border/50">
+                                    <p className="text-[10px] font-mono uppercase tracking-widest text-brand-muted">
+                                        {rp.phaseLabel}
+                                    </p>
+                                    <p className="mt-1 font-mono text-xl text-brand-accent drop-shadow-[0_0_8px_rgba(45,212,191,0.3)]">
+                                        {rp.currentPhase}
+                                    </p>
+                                </div>
 
-                        {/* Risk */}
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs uppercase tracking-widest text-brand-muted">
-                                    {rp.riskLabel}
-                                </p>
-                                <p className="mt-1 text-sm text-brand-text">{rp.riskValue}</p>
+                                {/* Trend */}
+                                <div className="group/item rounded-lg bg-brand-card/20 p-4 transition-colors hover:bg-brand-card/40 border border-transparent hover:border-brand-border/50">
+                                    <p className="text-[10px] font-mono uppercase tracking-widest text-brand-muted">
+                                        {rp.trendLabel}
+                                    </p>
+                                    <p className="mt-1 text-sm text-brand-text">
+                                        {rp.trendValue}
+                                    </p>
+                                    {/* Mini bar chart visualization */}
+                                    <div className="mt-4 flex items-end gap-1 h-12">
+                                        {[40, 55, 45, 60, 70, 65, 80, 85, 90].map((h, i) => (
+                                            <div
+                                                key={i}
+                                                className="w-full rounded-sm bg-brand-accent/20 transition-all duration-300 group-hover/item:bg-brand-accent/40"
+                                                style={{
+                                                    height: `${h}%`,
+                                                    transitionDelay: `${i * 30}ms`
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Risk & Action Split */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* Risk */}
+                                    <div className="group/item rounded-lg bg-brand-card/20 p-4 transition-colors hover:bg-brand-card/40 border border-transparent hover:border-brand-border/50">
+                                        <p className="text-[10px] font-mono uppercase tracking-widest text-brand-muted">
+                                            {rp.riskLabel}
+                                        </p>
+                                        <div className="mt-2 flex gap-1">
+                                            <div className="h-1.5 flex-1 rounded-full bg-brand-accent shadow-[0_0_5px_rgba(45,212,191,0.5)]" />
+                                            <div className="h-1.5 w-1/4 rounded-full bg-brand-border" />
+                                            <div className="h-1.5 w-1/4 rounded-full bg-brand-border" />
+                                        </div>
+                                        <p className="mt-2 text-xs text-brand-text">{rp.riskValue}</p>
+                                    </div>
+
+                                    {/* Recommendation */}
+                                    <div className="group/item rounded-lg bg-brand-card/20 p-4 transition-colors hover:bg-brand-card/40 border border-transparent hover:border-brand-border/50">
+                                        <p className="text-[10px] font-mono uppercase tracking-widest text-brand-muted">
+                                            {rp.recommendationLabel}
+                                        </p>
+                                        <p className="mt-2 text-xs text-brand-text leading-tight">
+                                            {rp.recommendationValue}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex gap-1">
-                                <div className="h-2 w-6 rounded-full bg-brand-accent" />
-                                <div className="h-2 w-6 rounded-full bg-brand-border" />
-                                <div className="h-2 w-6 rounded-full bg-brand-border" />
-                            </div>
-                        </div>
-
-                        <div className="h-px bg-brand-border" />
-
-                        {/* Recommendation */}
-                        <div>
-                            <p className="text-xs uppercase tracking-widest text-brand-muted">
-                                {rp.recommendationLabel}
-                            </p>
-                            <p className="mt-1 text-sm text-brand-text">
-                                {rp.recommendationValue}
-                            </p>
                         </div>
                     </div>
                 </div>
