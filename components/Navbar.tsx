@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import Logo from './Logo';
 import { useLanguage } from '@/lib/LanguageContext';
 import type { Locale } from '@/lib/i18n';
+import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import Link from 'next/link';
 
 const localeLabels: { locale: Locale; label: string }[] = [
     { locale: 'en', label: 'English' },
@@ -97,8 +99,8 @@ export default function Navbar() {
                                             setIsLangOpen(false);
                                         }}
                                         className={`flex w-full items-center px-4 py-2 text-sm transition-colors ${locale === loc
-                                                ? 'bg-brand-accent/10 text-brand-accent'
-                                                : 'text-brand-text hover:bg-brand-border/50'
+                                            ? 'bg-brand-accent/10 text-brand-accent'
+                                            : 'text-brand-text hover:bg-brand-border/50'
                                             }`}
                                     >
                                         {label}
@@ -113,12 +115,37 @@ export default function Navbar() {
                         )}
                     </div>
 
-                    <a
-                        href="#pricing"
-                        className="rounded-md bg-brand-accent px-4 py-2 text-sm font-medium text-brand-dark transition-colors hover:bg-brand-accent-hover hidden sm:block"
-                    >
-                        {t.nav.getReport}
-                    </a>
+                    <div className="flex items-center gap-4">
+                        <SignedOut>
+                            <SignInButton mode="modal">
+                                <button className="text-sm font-medium text-brand-muted hover:text-brand-text transition-colors">
+                                    Sign In
+                                </button>
+                            </SignInButton>
+                            <a
+                                href="#pricing"
+                                className="rounded-md bg-brand-accent px-4 py-2 text-sm font-medium text-brand-dark transition-colors hover:bg-brand-accent-hover hidden sm:block shadow-lg shadow-brand-accent/20"
+                            >
+                                {t.nav.getReport}
+                            </a>
+                        </SignedOut>
+                        <SignedIn>
+                            <Link
+                                href="/dashboard"
+                                className="text-sm font-medium text-brand-muted hover:text-brand-text transition-colors"
+                            >
+                                Dashboard
+                            </Link>
+                            <UserButton
+                                afterSignOutUrl="/"
+                                appearance={{
+                                    elements: {
+                                        avatarBox: "w-8 h-8 rounded-lg border border-brand-border"
+                                    }
+                                }}
+                            />
+                        </SignedIn>
+                    </div>
                 </div>
             </div>
         </nav>

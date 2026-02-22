@@ -29,8 +29,27 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## SaaS Setup & Configuration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This project has been transformed into a full SaaS platform on the `feature/saas-loop` branch. To run the commercial loop, you must configure the following:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 1. Environment Variables
+Create a `.env.local` file with:
+- **Clerk**: `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `CLERK_WEBHOOK_SECRET`
+- **Supabase**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+- **Stripe**: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
+- **AI**: `GOOGLE_GENERATIVE_AI_API_KEY` (Gemini API)
+
+### 2. Database Schema
+Ensure your Supabase project has a `users` table with:
+- `id` (text, matches Clerk ID)
+- `email` (text)
+- `plan` (text: free/premium/plus/pro/ultra)
+- `credits` (int)
+- `birth_date`, `birth_time`, `birth_location`
+
+### 3. Webhooks
+- Configure **Clerk Webhook** to point to `/api/webhook/clerk`
+- Configure **Stripe Webhook** to point to `/api/webhook/stripe`
+
+Check out the [walkthrough.md](file:///Users/raywang/.gemini/antigravity/brain/6141e8e8-a3a9-497a-9aa8-a61eda19347e/walkthrough.md) for more details.

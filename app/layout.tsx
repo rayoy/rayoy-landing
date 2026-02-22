@@ -1,53 +1,31 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
+import { ClerkProvider } from '@clerk/nextjs';
+import { dark } from '@clerk/themes';
+import type { Metadata } from 'next';
+import './globals.css';
+import { LanguageProvider } from '@/lib/LanguageContext';
 
 export const metadata: Metadata = {
-  title: "Rayoy — AI Cycle Intelligence System",
-  description:
-    "Rayoy analyzes your personal and business cycle to help you decide when to expand, pause, or pivot. Strategy is timing.",
-  keywords: [
-    "cycle intelligence",
-    "strategic timing",
-    "business cycle analysis",
-    "decision support",
-    "AI strategy",
-  ],
-  openGraph: {
-    title: "Rayoy — AI Cycle Intelligence System",
-    description:
-      "Analyze your personal and business cycle. Know when to expand, pause, or pivot.",
-    type: "website",
-    siteName: "Rayoy",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Rayoy — AI Cycle Intelligence System",
-    description:
-      "Analyze your personal and business cycle. Know when to expand, pause, or pivot.",
-  },
+  title: 'Rayoy — AI Cycle Intelligence System',
+  description: 'Analyze your personal and business cycle. Know when to expand, pause, or pivot.',
 };
-
-import ClientLayout from "./ClientLayout";
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased`}>
-        <ClientLayout>
-          {children}
-        </ClientLayout>
-      </body>
-    </html>
+    <ClerkProvider
+      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_Y2xlcmstYnVpbGQtdGltZS1kdW1teS1rZXktMTIz'}
+      appearance={{ baseTheme: dark, variables: { colorPrimary: '#6366f1' } }}
+    >
+      <html lang="en" className="dark">
+        <body className="bg-black text-white antialiased min-h-screen">
+          <LanguageProvider>
+            {children}
+          </LanguageProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
