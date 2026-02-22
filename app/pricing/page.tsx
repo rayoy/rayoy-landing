@@ -7,7 +7,8 @@ import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/LanguageContext';
 
-const priceIds = [null, 'price_plus_mock_id', 'price_pro_mock_id', 'price_ultra_mock_id'];
+// LemonSqueezy variant IDs — replace with real IDs from your LS dashboard
+const variantIds = [null, 'VARIANT_PLUS', 'VARIANT_PRO', 'VARIANT_ULTRA'];
 const prices = ['$0', '$19', '$49', '$199'];
 const periods = [undefined, '/mo', '/mo', '/yr'];
 
@@ -18,23 +19,23 @@ export default function PricingPage() {
     const { ta } = useLanguage();
     const t = ta.pricing;
 
-    const handleCheckout = async (priceId: string | null) => {
+    const handleCheckout = async (variantId: string | null) => {
         if (!isSignedIn) {
             router.push('/sign-in');
             return;
         }
 
-        if (!priceId) {
+        if (!variantId) {
             router.push('/dashboard');
             return;
         }
 
-        setLoading(priceId);
+        setLoading(variantId);
         try {
-            const res = await fetch('/api/stripe/checkout', {
+            const res = await fetch('/api/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ priceId }),
+                body: JSON.stringify({ variantId }),
             });
             const data = await res.json();
             if (data.url) {
@@ -118,14 +119,14 @@ export default function PricingPage() {
                             </ul>
 
                             <button
-                                onClick={() => handleCheckout(priceIds[i])}
-                                disabled={loading === priceIds[i]}
+                                onClick={() => handleCheckout(variantIds[i])}
+                                disabled={loading === variantIds[i]}
                                 className={`mt-8 block w-full py-3 px-4 rounded-xl text-center font-semibold text-sm transition-all duration-200 ${i === 1
                                     ? 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
                                     : 'bg-white/5 hover:bg-white/10 text-white border border-white/10'
                                     }`}
                             >
-                                {loading === priceIds[i] ? t.processing : plan.buttonText}
+                                {loading === variantIds[i] ? t.processing : plan.buttonText}
                             </button>
                         </motion.div>
                     ))}
