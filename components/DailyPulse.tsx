@@ -3,20 +3,23 @@
 
 import { useState, useEffect } from 'react';
 import { Zap, RefreshCcw } from 'lucide-react';
+import { useLanguage } from '@/lib/LanguageContext';
 
 export default function DailyPulse() {
     const [pulse, setPulse] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const { locale, ta } = useLanguage();
+    const t = ta.dailyPulse;
 
     const fetchPulse = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/pulse');
+            const res = await fetch(`/api/pulse?locale=${locale}`);
             const data = await res.json();
             setPulse(data.text);
         } catch (err) {
             console.error('Failed to fetch pulse', err);
-            setPulse('The alignment is shifting. Focus on structural integrity today.');
+            setPulse(t.fallback);
         } finally {
             setLoading(false);
         }
@@ -24,7 +27,8 @@ export default function DailyPulse() {
 
     useEffect(() => {
         fetchPulse();
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [locale]);
 
     return (
         <div className="w-full mt-12 p-8 rounded-[2.5rem] bg-indigo-600/5 border border-indigo-500/10 relative overflow-hidden group">
@@ -34,8 +38,8 @@ export default function DailyPulse() {
                         <Zap className="w-6 h-6 text-indigo-400 fill-indigo-400/20" />
                     </div>
                     <div>
-                        <h3 className="text-sm font-bold text-indigo-400 uppercase tracking-widest">Daily Strategic Pulse</h3>
-                        <p className="text-xs text-indigo-400/50 mt-1 font-mono uppercase">Calculated: {new Date().toLocaleDateString()}</p>
+                        <h3 className="text-sm font-bold text-indigo-400 uppercase tracking-widest">{t.title}</h3>
+                        <p className="text-xs text-indigo-400/50 mt-1 font-mono uppercase">{t.calculated}: {new Date().toLocaleDateString()}</p>
                     </div>
                 </div>
                 <button
@@ -55,7 +59,7 @@ export default function DailyPulse() {
                     </div>
                 ) : (
                     <blockquote className="text-2xl font-light text-gray-200 leading-relaxed italic">
-                        "{pulse}"
+                        &ldquo;{pulse}&rdquo;
                     </blockquote>
                 )}
             </div>

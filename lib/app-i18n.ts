@@ -98,6 +98,12 @@ export interface AppTranslations {
         cityPlaceholder: string;
         saveProfile: string;
     };
+    // Daily Pulse
+    dailyPulse: {
+        title: string;
+        calculated: string;
+        fallback: string;
+    };
 }
 
 export const appTranslations: Record<Locale, AppTranslations> = {
@@ -217,6 +223,11 @@ export const appTranslations: Record<Locale, AppTranslations> = {
             cityPlaceholder: 'e.g., Shanghai, China',
             saveProfile: 'Save Profile',
         },
+        dailyPulse: {
+            title: 'Daily Strategic Pulse',
+            calculated: 'Calculated',
+            fallback: 'The alignment is shifting. Focus on structural integrity today.',
+        },
     },
     'zh-CN': {
         landing: {
@@ -334,6 +345,11 @@ export const appTranslations: Record<Locale, AppTranslations> = {
             cityPlaceholder: '例如：上海',
             saveProfile: '保存档案',
         },
+        dailyPulse: {
+            title: '每日战略脉冲',
+            calculated: '计算时间',
+            fallback: '能量正在转移。今天请聚焦于结构稳固性。',
+        },
     },
     'zh-TW': {
         landing: {
@@ -450,6 +466,11 @@ export const appTranslations: Record<Locale, AppTranslations> = {
             cityOfBirth: '出生城市',
             cityPlaceholder: '例如：上海',
             saveProfile: '儲存檔案',
+        },
+        dailyPulse: {
+            title: '每日戰略脈衝',
+            calculated: '計算時間',
+            fallback: '能量正在轉移。今天請聚焦於結構穩固性。',
         },
     },
 };
