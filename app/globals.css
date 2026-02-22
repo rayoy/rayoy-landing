@@ -3,6 +3,13 @@
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand-text: #f3f4f6;
+  --color-brand-muted: #9ca3af;
+  --color-brand-accent: #6366f1;
+  --color-brand-accent-hover: #818cf8;
+  --color-brand-card: #1f2937;
+  --color-brand-border: #374151;
+  --color-brand-dark: #000000;
 }
 
 @layer base {

@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 
     // Start the text stream with Gemini
     const result = await streamText({
-        model: google('gemini-2.5-flash'), // or gemini-1.5-pro for reasoning
+        model: google('gemini-2.0-flash'), // or gemini-1.5-pro for reasoning
         system: `
       You are the Rayoy AI, a top-tier Strategic Advisor specializing in cycle timing. 
       You combine Western structured strategic thinking with Eastern astrological/cycle concepts (Bazi, Astrology).

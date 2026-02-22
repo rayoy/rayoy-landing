@@ -20,6 +20,13 @@ export async function POST(req: Request) {
         // Usually you would lookup the user's stripe_customer_id in Supabase here.
         // For MVP, we will let Stripe create a new customer or match by email.
 
+        // Mocking Stripe for development if no real key is provided
+        if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('placeholder')) {
+            console.log('--- MOCK STRIPE CHECKOUT ---');
+            console.log('Price ID:', priceId);
+            return NextResponse.json({ url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true` });
+        }
+
         const session = await stripe.checkout.sessions.create({
             success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true`,
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,

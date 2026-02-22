@@ -1,6 +1,12 @@
+'use client';
+
 import Link from 'next/link';
+import { useLanguage } from '@/lib/LanguageContext';
 
 export default function SuccessPage() {
+    const { ta } = useLanguage();
+    const t = ta.success;
+
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-brand-dark px-6 text-center">
             <div className="mx-auto max-w-md rounded-2xl border border-brand-accent/30 bg-brand-card/30 p-10 shadow-[0_0_40px_rgba(45,212,191,0.1)] backdrop-blur-sm">
@@ -16,16 +22,22 @@ export default function SuccessPage() {
                     </svg>
                 </div>
                 <h1 className="text-3xl font-bold tracking-tight text-brand-text mb-4">
-                    Payment Successful
+                    {t.title}
                 </h1>
                 <p className="text-brand-muted mb-8 leading-relaxed">
-                    Your payment has been securely processed. We are now initializing your cycle intelligence analysis environment.
+                    {t.description}
                 </p>
                 <Link
-                    href="/"
+                    href="/dashboard"
                     className="inline-flex w-full items-center justify-center rounded-md bg-brand-accent px-6 py-3 text-sm font-medium text-brand-dark transition-all hover:bg-brand-accent-hover hover:shadow-[0_0_20px_rgba(45,212,191,0.4)]"
                 >
-                    Return to Dashboard
+                    {t.ctaDashboard}
+                </Link>
+                <Link
+                    href="/"
+                    className="mt-3 inline-flex w-full items-center justify-center rounded-md px-6 py-3 text-sm font-medium text-brand-muted transition-all hover:text-brand-text"
+                >
+                    {t.ctaHome}
                 </Link>
             </div>
         </div>

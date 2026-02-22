@@ -7,16 +7,18 @@ import type { Locale } from '@/lib/i18n';
 import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 
-const localeLabels: { locale: Locale; label: string }[] = [
-    { locale: 'en', label: 'English' },
-    { locale: 'zh-CN', label: '简体中文' },
-    { locale: 'zh-TW', label: '繁體中文' },
+const localeLabels: { locale: Locale; label: string; short: string }[] = [
+    { locale: 'en', label: 'English', short: 'EN' },
+    { locale: 'zh-CN', label: '简体中文', short: '简' },
+    { locale: 'zh-TW', label: '繁體中文', short: '繁' },
 ];
 
 export default function Navbar() {
     const { locale, setLocale, t } = useLanguage();
     const [isLangOpen, setIsLangOpen] = useState(false);
     const langRef = useRef<HTMLDivElement>(null);
+
+    const currentLabel = localeLabels.find(l => l.locale === locale)?.short || 'EN';
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -68,13 +70,13 @@ export default function Navbar() {
                     <div className="relative flex items-center" ref={langRef}>
                         <button
                             onClick={() => setIsLangOpen(!isLangOpen)}
-                            className="flex items-center justify-center rounded-full p-2 text-brand-muted transition-colors hover:bg-brand-card/50 hover:text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-accent/50"
+                            className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-brand-muted transition-colors hover:bg-brand-card/50 hover:text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-accent/50"
                             aria-label="Change language"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                width="20"
-                                height="20"
+                                width="18"
+                                height="18"
                                 viewBox="0 0 24 24"
                                 fill="none"
                                 stroke="currentColor"
@@ -85,6 +87,10 @@ export default function Navbar() {
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <line x1="2" y1="12" x2="22" y2="12"></line>
                                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            </svg>
+                            <span className="text-xs font-medium">{currentLabel}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="m6 9 6 6 6-6" />
                             </svg>
                         </button>
 

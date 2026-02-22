@@ -5,54 +5,22 @@ import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/lib/LanguageContext';
 
-const plans = [
-    {
-        name: 'Free Report',
-        price: '$0',
-        description: 'Basic analysis to get you started.',
-        features: ['1 Basic 3-Year Trend', 'General Risk Level', 'One-time Generation'],
-        buttonText: 'Get Started',
-        priceId: null, // No pricing ID for free
-    },
-    {
-        name: 'Plus',
-        price: '$19',
-        period: '/mo',
-        description: 'Advanced strategic insights for individuals.',
-        features: ['Detailed Monthly Cycles', 'Bazi & Astrology Integration', '10 Agent Queries / mo', 'Email Support'],
-        buttonText: 'Upgrade to Plus',
-        priceId: 'price_plus_mock_id', // Mock ID
-        recommended: true,
-    },
-    {
-        name: 'Pro',
-        price: '$49',
-        period: '/mo',
-        description: 'For founders making critical timing decisions.',
-        features: ['Everything in Plus', 'Unlimited Agent Queries', 'Partnership Alignment', 'Priority Support'],
-        buttonText: 'Upgrade to Pro',
-        priceId: 'price_pro_mock_id', // Mock ID
-    },
-    {
-        name: 'Ultra',
-        price: '$199',
-        period: '/yr',
-        description: 'The ultimate cycle intelligence system.',
-        features: ['Everything in Pro', 'Bespoke Annual Strategy', '1-on-1 Quarterly Review', 'White-glove Onboarding'],
-        buttonText: 'Get Ultra',
-        priceId: 'price_ultra_mock_id', // Mock ID
-    },
-];
+const priceIds = [null, 'price_plus_mock_id', 'price_pro_mock_id', 'price_ultra_mock_id'];
+const prices = ['$0', '$19', '$49', '$199'];
+const periods = [undefined, '/mo', '/mo', '/yr'];
 
 export default function PricingPage() {
     const [loading, setLoading] = useState<string | null>(null);
     const { isSignedIn } = useAuth();
     const router = useRouter();
+    const { ta } = useLanguage();
+    const t = ta.pricing;
 
     const handleCheckout = async (priceId: string | null) => {
         if (!isSignedIn) {
-            router.push('/sign-in'); // Redirect to Clerk login
+            router.push('/sign-in');
             return;
         }
 
@@ -82,13 +50,24 @@ export default function PricingPage() {
     return (
         <div className="min-h-screen bg-black text-white selection:bg-indigo-500 py-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Back button */}
+                <button
+                    onClick={() => router.back()}
+                    className="mb-12 flex items-center gap-2 text-sm text-gray-500 hover:text-white transition-colors group"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform">
+                        <path d="m15 18-6-6 6-6" />
+                    </svg>
+                    {t.back}
+                </button>
+
                 <div className="text-center">
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-3xl font-extrabold sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-gray-200 to-gray-500"
                     >
-                        Invest in Timing
+                        {t.title}
                     </motion.h2>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
@@ -96,26 +75,26 @@ export default function PricingPage() {
                         transition={{ delay: 0.1 }}
                         className="mt-4 text-xl text-gray-400 max-w-2xl mx-auto"
                     >
-                        Choose the intelligence tier that matches your ambition. Stop guessing when to pivot.
+                        {t.description}
                     </motion.p>
                 </div>
 
                 <div className="mt-20 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                    {plans.map((plan, i) => (
+                    {t.plans.map((plan, i) => (
                         <motion.div
                             key={plan.name}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.1 + 0.2 }}
-                            className={`relative p-8 rounded-3xl border ${plan.recommended
-                                    ? 'border-indigo-500 bg-gray-900/50 shadow-2xl shadow-indigo-500/10'
-                                    : 'border-gray-800 bg-gray-900/20 backdrop-blur-sm'
+                            className={`relative p-8 rounded-3xl border ${i === 1
+                                ? 'border-indigo-500 bg-gray-900/50 shadow-2xl shadow-indigo-500/10'
+                                : 'border-gray-800 bg-gray-900/20 backdrop-blur-sm'
                                 } flex flex-col`}
                         >
-                            {plan.recommended && (
+                            {i === 1 && (
                                 <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2">
                                     <span className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
-                                        Most Popular
+                                        {t.mostPopular}
                                     </span>
                                 </div>
                             )}
@@ -124,8 +103,8 @@ export default function PricingPage() {
                                 <h3 className="text-xl font-semibold text-gray-200">{plan.name}</h3>
                                 <p className="mt-2 text-sm text-gray-400 min-h-[40px]">{plan.description}</p>
                                 <div className="mt-4 flex items-baseline text-5xl font-extrabold">
-                                    {plan.price}
-                                    {plan.period && <span className="ml-1 text-xl font-medium text-gray-500">{plan.period}</span>}
+                                    {prices[i]}
+                                    {periods[i] && <span className="ml-1 text-xl font-medium text-gray-500">{periods[i]}</span>}
                                 </div>
                             </div>
 
@@ -139,14 +118,14 @@ export default function PricingPage() {
                             </ul>
 
                             <button
-                                onClick={() => handleCheckout(plan.priceId)}
-                                disabled={loading === plan.priceId}
-                                className={`mt-8 block w-full py-3 px-4 rounded-xl text-center font-semibold text-sm transition-all duration-200 ${plan.recommended
-                                        ? 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
-                                        : 'bg-white/5 hover:bg-white/10 text-white border border-white/10'
+                                onClick={() => handleCheckout(priceIds[i])}
+                                disabled={loading === priceIds[i]}
+                                className={`mt-8 block w-full py-3 px-4 rounded-xl text-center font-semibold text-sm transition-all duration-200 ${i === 1
+                                    ? 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
+                                    : 'bg-white/5 hover:bg-white/10 text-white border border-white/10'
                                     }`}
                             >
-                                {loading === plan.priceId ? 'Processing...' : plan.buttonText}
+                                {loading === priceIds[i] ? t.processing : plan.buttonText}
                             </button>
                         </motion.div>
                     ))}

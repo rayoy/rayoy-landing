@@ -3,12 +3,15 @@
 import { useChat } from '@ai-sdk/react';
 import { useRef, useEffect } from 'react';
 import { Send, Bot, User as UserIcon } from 'lucide-react';
+import { useLanguage } from '@/lib/LanguageContext';
 
 export default function AgentTerminal() {
     const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
         api: '/api/chat',
     });
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const { ta } = useLanguage();
+    const t = ta.chat;
 
     // Auto-scroll to bottom
     useEffect(() => {
@@ -20,17 +23,17 @@ export default function AgentTerminal() {
             <div className="bg-black/50 border-b border-gray-800 px-6 py-4 flex items-center justify-between z-10">
                 <div className="flex items-center gap-3">
                     <Bot className="text-indigo-400 w-5 h-5" />
-                    <h2 className="font-semibold text-gray-200 tracking-wide">Strategic Agent Terminal</h2>
+                    <h2 className="font-semibold text-gray-200 tracking-wide">{t.title}</h2>
                 </div>
-                <div className="text-xs font-mono text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded">SYS_ONLINE</div>
+                <div className="text-xs font-mono text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded">{t.sysOnline}</div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth z-10 relative">
                 {messages.length === 0 && (
                     <div className="h-full flex flex-col items-center justify-center text-center opacity-50">
                         <Bot className="w-16 h-16 mb-4 text-gray-400" />
-                        <p className="text-gray-300">Agent Alpha is ready.</p>
-                        <p className="text-sm text-gray-500 mt-2 max-w-sm">Ask about your current cycle, business timing, or request a Bazi reading.</p>
+                        <p className="text-gray-300">{t.agentReady}</p>
+                        <p className="text-sm text-gray-500 mt-2 max-w-sm">{t.agentHint}</p>
                     </div>
                 )}
 
@@ -42,11 +45,11 @@ export default function AgentTerminal() {
                             </div>
                         )}
 
-                        <div className={`px-5 py-4 rounded-2xl max-id-80% ${message.role === 'user'
+                        <div className={`px-5 py-4 rounded-2xl max-w-[80%] ${message.role === 'user'
                             ? 'bg-indigo-600 text-white rounded-br-none shadow-[0_0_20px_rgba(79,70,229,0.3)]'
                             : 'bg-black border border-gray-800 text-gray-300 rounded-bl-none prose prose-invert max-w-none break-words shadow-[0_0_30px_rgba(0,0,0,0.5)]'
                             }`}>
-                            {/* If the model is using a tool, show a status indicator */}
+                            {/* Tool invocations */}
                             {message.toolInvocations?.map((toolInvocation: any) => {
                                 const toolCallId = toolInvocation.toolCallId;
                                 const isResult = 'result' in toolInvocation || toolInvocation.state === 'result';
@@ -56,8 +59,8 @@ export default function AgentTerminal() {
                                         {!isResult && <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(129,140,248,0.8)]" />}
                                         <span className={isResult ? "text-indigo-300" : "text-indigo-400"}>
                                             {isResult
-                                                ? `✓ EXECUTED: ${toolInvocation.toolName.toUpperCase()}`
-                                                : `RUNNING ALGORITHM: ${toolInvocation.toolName.toUpperCase()}...`}
+                                                ? `${t.toolExecuted} ${toolInvocation.toolName.toUpperCase()}`
+                                                : `${t.toolRunning} ${toolInvocation.toolName.toUpperCase()}...`}
                                         </span>
                                     </div>
                                 );
@@ -79,7 +82,7 @@ export default function AgentTerminal() {
                             <Bot className="w-5 h-5 text-indigo-400" />
                         </div>
                         <div className="px-5 py-4 rounded-2xl bg-black border border-gray-800 text-gray-500 rounded-bl-none flex space-x-2 items-center">
-                            <span className="text-xs font-mono animate-pulse">THINKING...</span>
+                            <span className="text-xs font-mono animate-pulse">{t.thinking}</span>
                             <div className="flex gap-1 ml-2">
                                 <div className="w-1 h-1 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                                 <div className="w-1 h-1 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -97,7 +100,7 @@ export default function AgentTerminal() {
                         className="w-full bg-black border border-gray-700 text-white rounded-xl pl-4 pr-12 py-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono text-sm placeholder:text-gray-500"
                         value={input}
                         onChange={handleInputChange}
-                        placeholder="Query the cycle (e.g., 'Should I launch my product next week?')"
+                        placeholder={t.placeholder}
                         disabled={isLoading}
                     />
                     <button
