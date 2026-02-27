@@ -135,11 +135,14 @@ export default function TryPage() {
                                     {isZh ? '出生日期 *' : 'Date of Birth *'}
                                 </label>
                                 <input
-                                    type="date"
+                                    type="text"
                                     value={birthDate}
+                                    placeholder={isZh ? "年/月/日" : "yyyy-mm-dd"}
+                                    onFocus={(e) => (e.target.type = "date")}
+                                    onBlur={(e) => (!e.target.value && (e.target.type = "text"))}
                                     onChange={e => setBirthDate(e.target.value)}
                                     required
-                                    className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                                    className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-sans"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -150,7 +153,8 @@ export default function TryPage() {
                                     type="time"
                                     value={birthTime}
                                     onChange={e => setBirthTime(e.target.value)}
-                                    className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                                    lang={isZh ? 'zh-CN' : 'en-US'}
+                                    className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-sans"
                                 />
                             </div>
                         </div>
