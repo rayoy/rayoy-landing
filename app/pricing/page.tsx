@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/LanguageContext';
 
 // LemonSqueezy variant IDs — replace with real IDs from your LS dashboard
-const variantIds = [null, 'VARIANT_PLUS', 'VARIANT_PRO', 'VARIANT_ULTRA'];
+const variantIds = [null, '1347044', '1347053', '1347056'];
 const prices = ['$0', '$19', '$49', '$199'];
 const periods = [undefined, '/mo', '/mo', '/yr'];
 

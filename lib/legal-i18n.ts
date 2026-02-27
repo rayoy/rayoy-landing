@@ -48,7 +48,7 @@ Our reports are based on cycle intelligence models. We do not provide fortune te
 The content provided by Rayoy does not constitute financial, legal, medical, or professional advice. You should consult appropriate professionals for specific advice tailored to your situation.
 
 ### 5. Payments and Refunds
-All payments are processed securely via Stripe. Because our products are digital and delivered immediately upon generation, **all sales are final and non-refundable**, except where required by law.
+All payments are processed securely via Lemon Squeezy. Because our products are digital and delivered immediately upon generation, **all sales are final and non-refundable**, except where required by law.
 
 ### 6. User Responsibility
 You assume full responsibility for your decisions. We shall not be liable for any direct, indirect, incidental, special, or consequential damages resulting from the use or inability to use our services.
@@ -70,7 +70,7 @@ The primary purpose of collecting your data is to generate your AI-assisted repo
 We do not sell, rent, or trade your personal information to third parties. Your data is used strictly for the provision of our services.
 
 ### 4. Payment Processing
-We do not store or process your credit card information on our servers. All payment data is securely handled directly by Stripe, our payment processor.
+We do not store or process your credit card information on our servers. All payment data is securely handled directly by Lemon Squeezy, our payment processor.
 
 ### 5. Data Security
 We implement reasonable security measures to protect your personal information from unauthorized access, alteration, disclosure, or destruction.
@@ -112,7 +112,7 @@ Rayoy 提供旨在用于个人反思和战略思考的 AI 生成的数字决策�
 Rayoy 提供的任何内容均不构成财务、法律、医疗或专业建议。如需针对您具体情况的建议，请咨询相关专业人士。
 
 ### 5. 支付与退款
-所有付款均通过 Stripe 安全处理。由于我们的产品是数字产品并在生成后立即交付，除非法律要求，**所有售出商品均不予退款**。
+所有付款均通过 Lemon Squeezy 安全处理。由于我们的产品是数字产品并在生成后立即交付，除非法律要求，**所有售出商品均不予退款**。
 
 ### 6. 用户责任
 您对自己的决定承担全部责任。对于因使用或无法使用我们的服务而导致的任何直接、间接、附带、特殊或后果性的损害，我们概不负责。
@@ -134,7 +134,7 @@ Rayoy 提供的任何内容均不构成财务、法律、医疗或专业建议�
 我们绝不出售、出租或交易您的个人信息给第三方。您的数据严格用于提供我们的服务。
 
 ### 4. 支付处理
-我们不在我们的服务器上存储或处理您的信用卡信息。所有支付数据均由我们的支付处理方 Stripe 直接安全处理。
+我们不在我们的服务器上存储或处理您的信用卡信息。所有支付数据均由我们的支付处理方 Lemon Squeezy 直接安全处理。
 
 ### 5. 数据安全
 我们采取合理的安全措施，以保护您的个人信息免遭未经授权的访问、更改、披露或破坏。
@@ -176,7 +176,7 @@ Rayoy 提供旨在用於個人反思和戰略思考的 AI 生成的數字決策�
 Rayoy 提供的任何內容均不構成財務、法律、醫療或專業建議。如需針對您具體情況的建議，請諮詢相關專業人士。
 
 ### 5. 支付與退款
-所有付款均通過 Stripe 安全處理。由於我們的產品是數字產品並在生成後立即交付，除非法律要求，**所有售出商品均不予退款**。
+所有付款均通過 Lemon Squeezy 安全處理。由於我們的產品是數字產品並在生成後立即交付，除非法律要求，**所有售出商品均不予退款**。
 
 ### 6. 用戶責任
 您對自己的決定承擔全部責任。對於因使用或無法使用我們的服務而導致的任何直接、間接、附帶、特殊或後果性的損害，我們概不負責。
@@ -198,7 +198,7 @@ Rayoy 提供的任何內容均不構成財務、法律、醫療或專業建議�
 我們絕不出售、出租或交易您的個人信息給第三方。您的數據嚴格用於提供我們的服務。
 
 ### 4. 支付處理
-我們不在我們的服務器上存儲或處理您的信用卡信息。所有支付數據均由我們的支付處理方 Stripe 直接安全處理。
+我們不在我們的服務器上存儲或處理您的信用卡信息。所有支付數據均由我們的支付處理方 Lemon Squeezy 直接安全處理。
 
 ### 5. 數據安全
 我們採取合理的安全措施，以保護您的個人信息免遭未經授權的訪問、更改、披露或破壞。

@@ -1,6 +1,5 @@
 
-import { google } from '@ai-sdk/google';
-import { generateText } from 'ai';
+import { generateTextWithFallback } from '@/lib/ai-provider';
 import { currentUser } from '@clerk/nextjs/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { calculateBaziChart } from '@/lib/bazi';
@@ -34,8 +33,7 @@ export async function GET(req: Request) {
         ? 'Respond ONLY in Chinese (简体中文).'
         : 'Respond ONLY in English.';
 
-    const result = await generateText({
-        model: google('gemini-2.0-flash'),
+    const result = await generateTextWithFallback({
         system: `You are the Daily Strategic Pulse engine for Rayoy.
 Your goal is to provide a single, punchy, 2-sentence maximum strategic insight for today.
 Use a professional, visionary, yet grounding tone. No mystical fluff.

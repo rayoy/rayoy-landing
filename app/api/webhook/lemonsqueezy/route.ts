@@ -2,9 +2,15 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { verifyWebhookSignature } from '@/lib/lemonsqueezy';
 
+// Known variant IDs
+const VARIANT_REPORT_UNLOCK = '1347035';
+const VARIANT_PLUS = '1347044';
+const VARIANT_PRO = '1347053';
+const VARIANT_ULTRA = '1347056';
+
 /**
  * LemonSqueezy webhook handler.
- * Listens for subscription and order events.
+ * Handles subscription events + one-time report purchases.
  */
 export async function POST(req: Request) {
     const rawBody = await req.text();
@@ -36,20 +42,51 @@ export async function POST(req: Request) {
 
     try {
         switch (eventName) {
-            case 'subscription_created':
             case 'order_created': {
-                // Determine plan from variant name or product name
-                const variantName = (attrs.variant_name || attrs.first_order_item?.variant_name || '').toLowerCase();
-                let plan = 'plus';
-                let credits = 10;
+                // Check variant to distinguish one-time report vs subscription order
+                const variantId = String(
+                    attrs.first_order_item?.variant_id || attrs.variant_id || ''
+                );
 
-                if (variantName.includes('pro')) {
-                    plan = 'pro';
-                    credits = 9999;
-                } else if (variantName.includes('ultra')) {
-                    plan = 'ultra';
-                    credits = 9999;
+                if (variantId === VARIANT_REPORT_UNLOCK) {
+                    // One-time report unlock
+                    const { error } = await supabaseAdmin
+                        .from('users')
+                        .update({ report_unlocked: true })
+                        .eq('id', userId);
+
+                    if (error) {
+                        console.error('Report unlock DB error:', error);
+                        throw error;
+                    }
+                    console.log(`User ${userId} unlocked premium report`);
+                } else {
+                    // Subscription-tied order — determine plan
+                    const plan = getPlanFromVariant(variantId);
+                    const credits = getCreditsForPlan(plan);
+
+                    const { error } = await supabaseAdmin
+                        .from('users')
+                        .update({
+                            plan,
+                            credits,
+                            ls_customer_id: String(attrs.customer_id || ''),
+                        })
+                        .eq('id', userId);
+
+                    if (error) {
+                        console.error('DB update error:', error);
+                        throw error;
+                    }
+                    console.log(`User ${userId} upgraded to ${plan} via order`);
                 }
+                break;
+            }
+
+            case 'subscription_created': {
+                const variantId = String(attrs.variant_id || '');
+                const plan = getPlanFromVariant(variantId);
+                const credits = getCreditsForPlan(plan);
 
                 const { error } = await supabaseAdmin
                     .from('users')
@@ -66,24 +103,20 @@ export async function POST(req: Request) {
                     throw error;
                 }
 
-                console.log(`User ${userId} upgraded to ${plan}`);
+                console.log(`User ${userId} subscribed to ${plan}`);
                 break;
             }
 
             case 'subscription_updated': {
-                // Handle plan changes or renewals
                 const status = attrs.status;
                 if (status === 'active') {
-                    // Renew credits on recurring payment
-                    const variantName = (attrs.variant_name || '').toLowerCase();
-                    let credits = 10;
-                    if (variantName.includes('pro') || variantName.includes('ultra')) {
-                        credits = 9999;
-                    }
+                    const variantId = String(attrs.variant_id || '');
+                    const plan = getPlanFromVariant(variantId);
+                    const credits = getCreditsForPlan(plan);
 
                     await supabaseAdmin
                         .from('users')
-                        .update({ credits })
+                        .update({ credits, plan })
                         .eq('id', userId);
                 }
                 break;
@@ -114,4 +147,29 @@ export async function POST(req: Request) {
     }
 
     return new NextResponse(null, { status: 200 });
+}
+
+function getPlanFromVariant(variantId: string): string {
+    switch (variantId) {
+        case VARIANT_PLUS:
+            return 'plus';
+        case VARIANT_PRO:
+            return 'pro';
+        case VARIANT_ULTRA:
+            return 'ultra';
+        default:
+            return 'plus'; // fallback
+    }
+}
+
+function getCreditsForPlan(plan: string): number {
+    switch (plan) {
+        case 'plus':
+            return 10;
+        case 'pro':
+        case 'ultra':
+            return 9999;
+        default:
+            return 0;
+    }
 }

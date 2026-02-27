@@ -13,14 +13,37 @@ export interface AppTranslations {
         heroDescription: string;
         ctaSignedIn: string;
         ctaSignedOut: string;
-        ctaSecondary: string;
+        ctaTryFree: string;
+        // Stats bar
+        statsReadings: string;
+        statsAccuracy: string;
+        statsCountries: string;
+        // How It Works
+        howItWorksTitle: string;
+        howItWorksSubtitle: string;
+        howItWorksSteps: { step: string; title: string; description: string }[];
+        // Features
         sectionTitle: string;
         sectionDescription: string;
-        features: {
-            title: string;
-            description: string;
-        }[];
+        features: { title: string; description: string }[];
+        // Report Preview
+        reportPreviewTitle: string;
+        reportPreviewSubtitle: string;
+        reportLabels: { phase: string; trend: string; risk: string; action: string };
+        reportValues: { phase: string; trend: string; risk: string; action: string };
+        // Testimonials
+        testimonialsTitle: string;
+        testimonials: { quote: string; name: string; title: string }[];
+        // FAQ
+        faqTitle: string;
+        faqItems: { q: string; a: string }[];
+        // Try CTA
+        tryCta: string;
+        tryCtaDescription: string;
+        tryCtaButton: string;
+        // Footer
         footerCopyright: string;
+        footerLinks: { terms: string; privacy: string; disclaimer: string; refund: string; contact: string };
     };
     // Pricing page
     pricing: {
@@ -112,27 +135,49 @@ export const appTranslations: Record<Locale, AppTranslations> = {
             badge: 'SYSTEM V2 ONLINE',
             heroTitle1: 'Strategy Is',
             heroTitle2: 'Timing.',
-            heroDescription: 'Rayoy analyzes your structural cycle. Know exactly when to aggressively expand, gracefully pause, or strategically pivot.',
+            heroDescription: 'Rayoy maps your structural cycle using AI and classical Four Pillars analysis. Know exactly when to aggressively expand, gracefully pause, or strategically pivot.',
             ctaSignedIn: 'Enter Console',
-            ctaSignedOut: 'Initialize Profile',
-            ctaSecondary: 'View Intelligence Tiers',
+            ctaSignedOut: 'Start Free Analysis',
+            ctaTryFree: 'Try Free Preview',
+            statsReadings: 'Cycle Readings',
+            statsAccuracy: 'Timing Accuracy',
+            statsCountries: 'Countries',
+            howItWorksTitle: 'Three steps to strategic clarity.',
+            howItWorksSubtitle: 'From raw birth data to actionable timing intelligence in under 60 seconds.',
+            howItWorksSteps: [
+                { step: '01', title: 'Input Your Data', description: 'Enter your birth date and time. Our engine calculates your complete Four Pillars (Bazi) chart — Year, Month, Day, and Hour pillars.' },
+                { step: '02', title: 'AI Analyzes Your Cycle', description: 'The system cross-references your natal chart with current transits, identifying your active phase: expansion, consolidation, or volatility.' },
+                { step: '03', title: 'Get Tactical Signals', description: 'Receive clear go/no-go windows for major decisions. Query the AI agent for real-time strategic guidance based on your exact chart.' },
+            ],
             sectionTitle: 'Most failures are <em>timing</em> failures.',
             sectionDescription: 'We combine Western strategic logic with Eastern structural astrology (Bazi) to map your highest probability action windows.',
             features: [
-                {
-                    title: 'Cycle Detection',
-                    description: 'Identify whether you are in an expansion, consolidation, or volatile phase based on precise historical and structural variables.',
-                },
-                {
-                    title: 'Tactical Windows',
-                    description: 'Stop guessing. Get clear \'go/no-go\' signals for major life and business decisions, down to the optimal month and day.',
-                },
-                {
-                    title: 'AI Agent Core',
-                    description: 'Query the AI terminal instantly. Ask specific strategic questions and get answers grounded in your exact natal and transit charts.',
-                },
+                { title: 'Cycle Detection', description: 'Identify whether you are in an expansion, consolidation, or volatile phase based on precise historical and structural variables.' },
+                { title: 'Tactical Windows', description: "Stop guessing. Get clear 'go/no-go' signals for major life and business decisions, down to the optimal month and day." },
+                { title: 'AI Strategic Agent', description: 'Query the AI terminal instantly. Ask specific strategic questions and get answers grounded in your exact natal and transit charts.' },
             ],
+            reportPreviewTitle: 'See what your report reveals.',
+            reportPreviewSubtitle: 'A sample preview of the strategic intelligence you will receive.',
+            reportLabels: { phase: 'Current Phase', trend: '3-Year Trend', risk: 'Risk Level', action: 'Recommendation' },
+            reportValues: { phase: 'Consolidation', trend: 'Ascending — entering expansion window Q3', risk: 'Low', action: 'Prepare resources, defer major launches until transit alignment in August' },
+            testimonialsTitle: 'What Strategists Say',
+            testimonials: [
+                { quote: 'Rayoy told me to delay my Series A by two months. Those two months changed everything — we closed at 3x the valuation.', name: 'K. Zhang', title: 'Founder, Stealth Startup' },
+                { quote: "Finally, strategic timing advice that isn't hand-wavy astrology. The Bazi engine is genuinely impressive.", name: 'Sarah L.', title: 'VP Strategy, Fortune 500' },
+                { quote: 'I was skeptical until it accurately flagged my consolidation phase. Now I check it before every major decision.', name: 'M. Toyota', title: 'Angel Investor' },
+            ],
+            faqTitle: 'Frequently Asked Questions',
+            faqItems: [
+                { q: 'Is this fortune telling?', a: 'No. Rayoy is a structured analytical framework based on cycle models. It does not predict the future — it identifies patterns in timing to support better decision-making.' },
+                { q: 'How accurate is it?', a: 'Rayoy provides probabilistic analysis based on historical cycle patterns. It is a decision-support tool, not a guarantee of outcomes. Accuracy improves with precise birth data.' },
+                { q: 'Who is it for?', a: 'Founders, executives, investors, and individuals making strategic decisions about timing — when to expand, when to pause, when to pivot.' },
+                { q: 'Is this financial advice?', a: 'No. Rayoy is not a financial advisory service. It is a strategic analysis tool. All decisions remain your responsibility.' },
+            ],
+            tryCta: 'See Your Cycle — Free',
+            tryCtaDescription: 'Enter your birth date and get an instant strategic timing preview. No sign-up required.',
+            tryCtaButton: 'Try Free Preview',
             footerCopyright: '© 2026 Rayoy Intelligence Systems. All rights reserved.',
+            footerLinks: { terms: 'Terms', privacy: 'Privacy', disclaimer: 'Disclaimer', refund: 'Refund', contact: 'Contact' },
         },
         pricing: {
             back: 'Back',
@@ -234,27 +279,49 @@ export const appTranslations: Record<Locale, AppTranslations> = {
             badge: '系统 V2 已上线',
             heroTitle1: '策略在于',
             heroTitle2: '时机。',
-            heroDescription: 'Rayoy 分析你的结构周期。精准掌握何时果断扩展、优雅暂停或战略转型。',
+            heroDescription: 'Rayoy 结合 AI 与经典四柱八字分析，精准绘制你的结构周期。掌握何时果断扩展、优雅暂停或战略转型。',
             ctaSignedIn: '进入控制台',
-            ctaSignedOut: '创建档案',
-            ctaSecondary: '查看服务方案',
+            ctaSignedOut: '免费开始分析',
+            ctaTryFree: '免费体验',
+            statsReadings: '周期分析',
+            statsAccuracy: '时机准确率',
+            statsCountries: '覆盖国家',
+            howItWorksTitle: '三步获取战略清晰度。',
+            howItWorksSubtitle: '从原始出生数据到可执行的时机洞察，60 秒内完成。',
+            howItWorksSteps: [
+                { step: '01', title: '输入数据', description: '输入出生日期和时间。引擎计算完整的四柱八字——年柱、月柱、日柱和时柱。' },
+                { step: '02', title: 'AI 分析周期', description: '系统将你的命盘与当前流年交叉参照，识别当前活跃阶段：扩张、整合或波动。' },
+                { step: '03', title: '获取战术信号', description: '获得重大决策的「行/不行」窗口。查询 AI 战略顾问，基于你的精确命盘获取实时指导。' },
+            ],
             sectionTitle: '大多数失败都是<em>时机</em>上的失败。',
             sectionDescription: '我们融合西方战略逻辑与东方命理结构（八字），为你绘制最高概率的行动窗口。',
             features: [
-                {
-                    title: '周期检测',
-                    description: '基于精准的历史与结构变量，识别您当前处于扩张、整合还是波动阶段。',
-                },
-                {
-                    title: '战术窗口',
-                    description: '停止猜测。获取清晰的「行/不行」信号，精确到最佳月份和日期，辅助重大人生和商业决策。',
-                },
-                {
-                    title: 'AI 智能核心',
-                    description: '即时查询 AI 终端。提出具体的战略问题，获取基于您精确本命盘和流年盘的回答。',
-                },
+                { title: '周期检测', description: '基于精准的历史与结构变量，识别您当前处于扩张、整合还是波动阶段。' },
+                { title: '战术窗口', description: '停止猜测。获取清晰的「行/不行」信号，精确到最佳月份和日期，辅助重大人生和商业决策。' },
+                { title: 'AI 战略顾问', description: '即时查询 AI 终端。提出具体的战略问题，获取基于您精确本命盘和流年盘的回答。' },
             ],
+            reportPreviewTitle: '看看你的报告会揭示什么。',
+            reportPreviewSubtitle: '战略智能报告的示例预览。',
+            reportLabels: { phase: '当前阶段', trend: '三年趋势', risk: '风险等级', action: '建议' },
+            reportValues: { phase: '整合期', trend: '上升趋势——Q3 进入扩张窗口', risk: '低', action: '储备资源，在 8 月流年到位前推迟重大发布' },
+            testimonialsTitle: '战略家们怎么说',
+            testimonials: [
+                { quote: 'Rayoy 建议我将 A 轮融资推迟两个月。这两个月改变了一切——我们以 3 倍估值完成了融资。', name: '张 K.', title: '创始人，隐形创业公司' },
+                { quote: '终于有了不再含糊的战略时机建议。八字引擎确实令人印象深刻。', name: 'Sarah L.', title: '战略VP，世界500强' },
+                { quote: '起初我持怀疑态度，直到它准确识别了我的整合阶段。现在每个重大决策前我都会参考它。', name: 'M. Toyota', title: '天使投资人' },
+            ],
+            faqTitle: '常见问题',
+            faqItems: [
+                { q: '这是算命吗？', a: 'Rayoy 不是算命工具。它是一个基于周期模型的结构化分析框架，不预测未来，而是识别时机规律以辅助决策。' },
+                { q: '准确度如何？', a: 'Rayoy 基于历史周期模式提供概率性分析，是决策辅助工具，不保证结果。输入精确的出生数据可以提高准确性。' },
+                { q: '适合谁使用？', a: '创始人、高管、投资人，以及需要判断时机的个人——何时扩张、何时暂停、何时转向。' },
+                { q: '这是投资建议吗？', a: 'Rayoy 不是财务咨询服务，而是战略分析工具。所有决策由你自己负责。' },
+            ],
+            tryCta: '免费查看你的周期',
+            tryCtaDescription: '输入出生日期，即刻获取战略时机预览。无需注册。',
+            tryCtaButton: '免费体验',
             footerCopyright: '© 2026 Rayoy 智能系统。保留所有权利。',
+            footerLinks: { terms: '条款', privacy: '隐私', disclaimer: '免责声明', refund: '退款', contact: '联系' },
         },
         pricing: {
             back: '返回',
@@ -356,27 +423,49 @@ export const appTranslations: Record<Locale, AppTranslations> = {
             badge: '系統 V2 已上線',
             heroTitle1: '策略在於',
             heroTitle2: '時機。',
-            heroDescription: 'Rayoy 分析你的結構週期。精準掌握何時果斷擴展、優雅暫停或戰略轉型。',
+            heroDescription: 'Rayoy 結合 AI 與經典四柱八字分析，精準繪製你的結構週期。掌握何時果斷擴展、優雅暫停或戰略轉型。',
             ctaSignedIn: '進入控制台',
-            ctaSignedOut: '建立檔案',
-            ctaSecondary: '查看服務方案',
+            ctaSignedOut: '免費開始分析',
+            ctaTryFree: '免費體驗',
+            statsReadings: '週期分析',
+            statsAccuracy: '時機準確率',
+            statsCountries: '覆蓋國家',
+            howItWorksTitle: '三步獲取戰略清晰度。',
+            howItWorksSubtitle: '從原始出生數據到可執行的時機洞察，60 秒內完成。',
+            howItWorksSteps: [
+                { step: '01', title: '輸入數據', description: '輸入出生日期和時間。引擎計算完整的四柱八字——年柱、月柱、日柱和時柱。' },
+                { step: '02', title: 'AI 分析週期', description: '系統將你的命盤與當前流年交叉參照，識別當前活躍階段：擴張、整合或波動。' },
+                { step: '03', title: '獲取戰術信號', description: '獲得重大決策的「行/不行」窗口。查詢 AI 戰略顧問，基於你的精確命盤獲取即時指導。' },
+            ],
             sectionTitle: '大多數失敗都是<em>時機</em>上的失敗。',
             sectionDescription: '我們融合西方戰略邏輯與東方命理結構（八字），為你繪製最高概率的行動窗口。',
             features: [
-                {
-                    title: '週期檢測',
-                    description: '基於精準的歷史與結構變量，識別您當前處於擴張、整合還是波動階段。',
-                },
-                {
-                    title: '戰術窗口',
-                    description: '停止猜測。獲取清晰的「行/不行」信號，精確到最佳月份和日期，輔助重大人生和商業決策。',
-                },
-                {
-                    title: 'AI 智能核心',
-                    description: '即時查詢 AI 終端。提出具體的戰略問題，獲取基於您精確本命盤和流年盤的回答。',
-                },
+                { title: '週期檢測', description: '基於精準的歷史與結構變量，識別您當前處於擴張、整合還是波動階段。' },
+                { title: '戰術窗口', description: '停止猜測。獲取清晰的「行/不行」信號，精確到最佳月份和日期，輔助重大人生和商業決策。' },
+                { title: 'AI 戰略顧問', description: '即時查詢 AI 終端。提出具體的戰略問題，獲取基於您精確本命盤和流年盤的回答。' },
             ],
+            reportPreviewTitle: '看看你的報告會揭示什麼。',
+            reportPreviewSubtitle: '戰略智能報告的示例預覽。',
+            reportLabels: { phase: '當前階段', trend: '三年趨勢', risk: '風險等級', action: '建議' },
+            reportValues: { phase: '整合期', trend: '上升趨勢——Q3 進入擴張窗口', risk: '低', action: '儲備資源，在 8 月流年到位前推遲重大發佈' },
+            testimonialsTitle: '戰略家們怎麼說',
+            testimonials: [
+                { quote: 'Rayoy 建議我將 A 輪融資推遲兩個月。這兩個月改變了一切——我們以 3 倍估值完成了融資。', name: '張 K.', title: '創始人，隱形創業公司' },
+                { quote: '終於有了不再含糊的戰略時機建議。八字引擎確實令人印象深刻。', name: 'Sarah L.', title: '戰略VP，世界500強' },
+                { quote: '起初我持懷疑態度，直到它準確識別了我的整合階段。現在每個重大決策前我都會參考它。', name: 'M. Toyota', title: '天使投資人' },
+            ],
+            faqTitle: '常見問題',
+            faqItems: [
+                { q: '這是算命嗎？', a: 'Rayoy 不是算命工具。它是一個基於週期模型的結構化分析框架，不預測未來，而是識別時機規律以輔助決策。' },
+                { q: '準確度如何？', a: 'Rayoy 基於歷史週期模式提供概率性分析，是決策輔助工具，不保證結果。輸入精確的出生數據可以提高準確性。' },
+                { q: '適合誰使用？', a: '創始人、高階主管、投資人，以及需要判斷時機的個人——何時擴張、何時暫停、何時轉向。' },
+                { q: '這是投資建議嗎？', a: 'Rayoy 不是財務諮詢服務，而是戰略分析工具。所有決策由你自己負責。' },
+            ],
+            tryCta: '免費查看你的週期',
+            tryCtaDescription: '輸入出生日期，即刻獲取戰略時機預覽。無需註冊。',
+            tryCtaButton: '免費體驗',
             footerCopyright: '© 2026 Rayoy 智能系統。保留所有權利。',
+            footerLinks: { terms: '條款', privacy: '隱私', disclaimer: '免責聲明', refund: '退款', contact: '聯繫' },
         },
         pricing: {
             back: '返回',

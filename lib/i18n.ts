@@ -2,10 +2,10 @@ export type Locale = 'en' | 'zh-CN' | 'zh-TW';
 
 export interface Translations {
     nav: {
-        method: string;
-        report: string;
+        howItWorks: string;
+        pricing: string;
+        tryFree: string;
         faq: string;
-        getReport: string;
     };
     hero: {
         headline: string;
@@ -62,10 +62,10 @@ export interface Translations {
 export const translations: Record<Locale, Translations> = {
     en: {
         nav: {
-            method: 'Method',
-            report: 'Report',
+            howItWorks: 'How It Works',
+            pricing: 'Pricing',
+            tryFree: 'Try Free',
             faq: 'FAQ',
-            getReport: 'Get Report',
         },
         hero: {
             headline: 'Strategy Is Timing.',
@@ -144,10 +144,10 @@ export const translations: Record<Locale, Translations> = {
     },
     'zh-CN': {
         nav: {
-            method: '方法论',
-            report: '报告',
+            howItWorks: '工作原理',
+            pricing: '定价',
+            tryFree: '免费体验',
             faq: '常见问题',
-            getReport: '获取报告',
         },
         hero: {
             headline: '决策，先看节奏。',
@@ -226,10 +226,10 @@ export const translations: Record<Locale, Translations> = {
     },
     'zh-TW': {
         nav: {
-            method: '方法論',
-            report: '報告',
+            howItWorks: '工作原理',
+            pricing: '定價',
+            tryFree: '免費體驗',
             faq: '常見問題',
-            getReport: '取得報告',
         },
         hero: {
             headline: '決策，先看節奏。',

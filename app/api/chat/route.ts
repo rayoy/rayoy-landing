@@ -1,5 +1,5 @@
-import { google } from '@ai-sdk/google';
-import { streamText, tool } from 'ai';
+import { streamTextWithFallback } from '@/lib/ai-provider';
+import { tool } from 'ai';
 import { z } from 'zod';
 import { currentUser } from '@clerk/nextjs/server';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -90,8 +90,7 @@ USER PROFILE:
 `;
 
     // 3. Stream with enhanced system prompt
-    const result = await streamText({
-        model: google('gemini-2.0-flash'),
+    const result = await streamTextWithFallback({
         system: `You are the RAYOY AI — an elite Strategic Timing Advisor.
 
 IDENTITY & MISSION:
