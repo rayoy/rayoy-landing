@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Sparkles, Loader2, Lock, Download } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/lib/LanguageContext';
@@ -326,8 +328,17 @@ export default function TryPage() {
                                         <h3 className="text-sm font-bold text-indigo-400 uppercase tracking-widest mb-4">
                                             {isZh ? '周期分析预览' : 'Cycle Analysis Preview'}
                                         </h3>
-                                        <div className="text-gray-200 leading-relaxed whitespace-pre-wrap text-sm">
-                                            {result.freePreview}
+                                        <div className="
+                                            text-gray-200 leading-relaxed text-sm
+                                            [&_p]:my-2
+                                            [&_strong]:text-white [&_strong]:font-semibold
+                                            [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:my-2
+                                            [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:my-2
+                                            [&_li]:my-1
+                                        ">
+                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                {result.freePreview || ''}
+                                            </ReactMarkdown>
                                         </div>
                                     </div>
                                 )}
@@ -341,10 +352,12 @@ export default function TryPage() {
                                                 {isZh ? '专业行动建议 & 最佳时机窗口' : 'Action Recommendations & Optimal Timing'}
                                             </h3>
                                             <div
-                                                className="text-gray-200 leading-relaxed whitespace-pre-wrap text-sm blur-[6px] select-none pointer-events-none"
+                                                className="text-gray-200 leading-relaxed text-sm blur-[6px] select-none pointer-events-none [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
                                                 aria-hidden="true"
                                             >
-                                                {result.lockedPreview}
+                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                    {result.lockedPreview || ''}
+                                                </ReactMarkdown>
                                             </div>
                                         </div>
 
