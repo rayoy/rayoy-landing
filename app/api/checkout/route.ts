@@ -18,12 +18,16 @@ export async function POST(req: Request) {
 
         const storeId = process.env.LEMONSQUEEZY_STORE_ID;
 
+        const host = req.headers.get('host');
+        const protocol = req.headers.get('x-forwarded-proto') || (host?.includes('localhost') ? 'http' : 'https');
+        const origin = `${protocol}://${host}`;
+
         // Mock mode for development
         if (!process.env.LEMONSQUEEZY_API_KEY || !storeId) {
             console.log('--- MOCK LEMONSQUEEZY CHECKOUT ---');
             console.log('Variant ID:', variantId);
             return NextResponse.json({
-                url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/success`,
+                url: `${origin}/success`,
             });
         }
 
@@ -32,7 +36,7 @@ export async function POST(req: Request) {
             variantId,
             userEmail: user.emailAddresses[0].emailAddress,
             userId: user.id,
-            redirectUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/success`,
+            redirectUrl: `${origin}/success`,
         });
 
         return NextResponse.json({ url: checkoutUrl });

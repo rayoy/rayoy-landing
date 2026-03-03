@@ -29,6 +29,18 @@ export async function GET(req: Request) {
         // ignore
     }
 
+    // Get user's fusion chart if they have birth data
+    let userFusionContext = 'User has not provided birth data. Provide general daily advice.';
+    if (dbUser?.birth_date) {
+        try {
+            const { calculateFusionChart } = await import('@/lib/fusion');
+            const userChart = calculateFusionChart(dbUser.birth_date, dbUser.birth_time || undefined, 'M');
+            userFusionContext = userChart.fusionContext;
+        } catch (e) {
+            console.error('Failed to calculate user fusion chart for pulse:', e);
+        }
+    }
+
     const languageInstruction = locale.startsWith('zh')
         ? 'Respond ONLY in Chinese (简体中文).'
         : 'Respond ONLY in English.';
@@ -41,7 +53,10 @@ Frame as structural cycle analysis, not fortune-telling.
 If user data is missing, base it on today's cosmic transit patterns.
 ${languageInstruction}`,
         prompt: `Generate today's pulse for user: ${user.firstName || 'Strategist'}.
-User Data: ${JSON.stringify(dbUser || {})}.
+USER STRUCTURAL CONTEXT (BAZI + ZIWEI):
+${userFusionContext}
+
+TODAY'S COSMIC TRANSIT:
 ${transitContext}
 Current Date: ${today.toLocaleDateString()}.
 Format: One inspiring sentence followed by one actionable tactical advice.`,

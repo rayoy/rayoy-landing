@@ -1,5 +1,5 @@
 import { generateTextWithFallback, proxyGenerateImage } from '@/lib/ai-provider';
-import { calculateBaziChart, getStrategicContext } from '@/lib/bazi';
+import { calculateFusionChart } from '@/lib/fusion';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(req: Request) {
@@ -11,14 +11,16 @@ export async function POST(req: Request) {
         return new Response('Birth date is required', { status: 400 });
     }
 
-    // Calculate real Bazi chart (always, regardless of AI success)
-    let chart;
+    // Calculate integrated Fusion chart
+    let fusionChart;
     try {
-        chart = calculateBaziChart(birthDate, birthTime || undefined);
+        fusionChart = calculateFusionChart(birthDate, birthTime || undefined, 'M');
     } catch (e) {
-        console.error('Bazi calculation error:', e);
-        return new Response('Invalid birth date', { status: 400 });
+        console.error('Fusion calculation error:', e);
+        return new Response('Invalid birth date/time', { status: 400 });
     }
+
+    const chart = fusionChart.bazi;
 
     const chartResponse = {
         fourPillars: `${chart.yearPillar.stem}${chart.yearPillar.branch} ${chart.monthPillar.stem}${chart.monthPillar.branch} ${chart.dayPillar.stem}${chart.dayPillar.branch}${chart.hourPillar ? ` ${chart.hourPillar.stem}${chart.hourPillar.branch}` : ''}`,
@@ -33,7 +35,7 @@ export async function POST(req: Request) {
     let lockedPreview: string | null = null;
     let imageUrl: string | null = null;
     try {
-        const strategicContext = getStrategicContext(chart);
+        const strategicContext = fusionChart.fusionContext;
 
         const languageInstruction = locale?.startsWith('zh')
             ? 'Respond ONLY in Chinese (简体中文). Use a professional yet engaging tone.'

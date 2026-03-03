@@ -184,18 +184,50 @@ export async function streamTextWithFallback(
                 String(opts.prompt || (opts as any).messages?.filter((m: any) => m.role === 'user').pop()?.content || ''),
             );
 
+            // Build AI SDK Data Stream Protocol response
+            // Format: text delta lines as `0:"chunk"\n`, then finish events
             const encoder = new TextEncoder();
+            const chunks: string[] = [];
+            // Split text into small chunks to simulate streaming
+            const chunkSize = 20;
+            for (let i = 0; i < text.length; i += chunkSize) {
+                const chunk = text.slice(i, i + chunkSize);
+                // Escape the chunk for JSON string
+                const escaped = JSON.stringify(chunk);
+                chunks.push(`0:${escaped}\n`);
+            }
+            // Finish reason event
+            chunks.push(`e:{"finishReason":"stop","usage":{"promptTokens":0,"completionTokens":0},"isContinued":false}\n`);
+            // Final data message
+            chunks.push(`d:{"finishReason":"stop","usage":{"promptTokens":0,"completionTokens":0}}\n`);
+
             const stream = new ReadableStream({
-                start(controller) {
-                    controller.enqueue(encoder.encode(text));
+                async start(controller) {
+                    for (const chunk of chunks) {
+                        controller.enqueue(encoder.encode(chunk));
+                        // Small delay between chunks for visual streaming effect
+                        await new Promise(r => setTimeout(r, 15));
+                    }
                     controller.close();
+                    // Invoke onFinish callback for conversation memory
+                    if ((opts as any).onFinish) {
+                        (opts as any).onFinish({
+                            text,
+                            finishReason: 'stop',
+                            usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+                        });
+                    }
                 },
             });
+
             return {
                 textStream: stream,
                 text: Promise.resolve(text),
                 toAIStreamResponse: () => new Response(stream, {
-                    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+                    headers: {
+                        'Content-Type': 'text/plain; charset=utf-8',
+                        'X-Vercel-AI-Data-Stream': 'v1',
+                    },
                 }),
             } as any;
         }
