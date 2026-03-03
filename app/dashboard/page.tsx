@@ -20,6 +20,21 @@ export default async function DashboardPage() {
         console.error('Failed to fetch user data', error);
     }
 
+    // Fetch extended user profile if it exists
+    const { data: extendedProfile } = await supabaseAdmin
+        .from('user_profiles_extended')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+    // Fetch recent agentic notifications
+    const { data: notifications } = await supabaseAdmin
+        .from('agentic_notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
     const plan = dbUser?.plan || 'Free';
     const credits = dbUser?.credits || 0;
 
@@ -29,6 +44,8 @@ export default async function DashboardPage() {
             plan={plan}
             credits={credits}
             hasBirthDate={!!dbUser?.birth_date}
+            extendedProfile={extendedProfile || null}
+            notifications={notifications || []}
         />
     );
 }

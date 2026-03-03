@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Sparkles, Loader2, Lock } from 'lucide-react';
+import { ArrowRight, Sparkles, Loader2, Lock, Download } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
@@ -30,6 +30,7 @@ export default function TryPage() {
     const [currentConcern, setCurrentConcern] = useState('');
     const [loading, setLoading] = useState(false);
     const [unlocking, setUnlocking] = useState(false);
+    const [downloadingPdf, setDownloadingPdf] = useState(false);
     const [result, setResult] = useState<TrialResult | null>(null);
     const [error, setError] = useState<string | null>(null);
     const { locale } = useLanguage();
@@ -93,6 +94,41 @@ export default function TryPage() {
         }
     };
 
+    const handleDownloadPdf = async () => {
+        if (!birthDate) return;
+        setDownloadingPdf(true);
+        try {
+            const userName = isSignedIn ? undefined : 'Strategist'; // Could fetch actual name if needed
+            const res = await fetch('/api/pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    birthDate,
+                    birthTime: birthTime || undefined,
+                    userName,
+                    locale,
+                    freePreview: result?.freePreview,
+                    lockedPreview: undefined,
+                }),
+            });
+            if (!res.ok) throw new Error('Failed to generate PDF');
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Rayoy_Report_${birthDate}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        } catch (error) {
+            console.error('PDF download failed:', error);
+            alert(isZh ? 'PDF 生成失败' : 'Failed to generate PDF');
+        } finally {
+            setDownloadingPdf(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-black text-white overflow-hidden">
             <Navbar />
@@ -115,7 +151,7 @@ export default function TryPage() {
                         </h1>
                         <p className="text-gray-400 text-lg">
                             {isZh
-                                ? '输入出生信息，即刻获取你的四柱八字和战略周期分析预览。'
+                                ? '输入出生信息，即刻获取你的战略周期分析预览。'
                                 : 'Enter your birth info for an instant Four Pillars analysis and strategic cycle preview.'}
                         </p>
                     </motion.div>
@@ -135,14 +171,11 @@ export default function TryPage() {
                                     {isZh ? '出生日期 *' : 'Date of Birth *'}
                                 </label>
                                 <input
-                                    type="text"
+                                    type="date"
                                     value={birthDate}
-                                    placeholder={isZh ? "年/月/日" : "yyyy-mm-dd"}
-                                    onFocus={(e) => (e.target.type = "date")}
-                                    onBlur={(e) => (!e.target.value && (e.target.type = "text"))}
                                     onChange={e => setBirthDate(e.target.value)}
                                     required
-                                    className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-sans"
+                                    className="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-sans [color-scheme:dark]"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -213,7 +246,6 @@ export default function TryPage() {
                         </button>
                     </motion.form>
 
-                    {/* Error */}
                     {error && (
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -270,6 +302,22 @@ export default function TryPage() {
                                         <p className="text-sm font-bold text-emerald-400">{isZh ? '强' : '↑'} {result.chart.dominantElement.zh}</p>
                                         <p className="text-sm font-bold text-red-400">{isZh ? '弱' : '↓'} {result.chart.weakestElement.zh}</p>
                                     </div>
+                                </div>
+
+                                {/* Download PDF Button */}
+                                <div className="flex justify-end">
+                                    <button
+                                        onClick={handleDownloadPdf}
+                                        disabled={downloadingPdf}
+                                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-xl transition-all disabled:opacity-50"
+                                    >
+                                        {downloadingPdf ? (
+                                            <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                                        ) : (
+                                            <Download className="w-4 h-4 text-indigo-400" />
+                                        )}
+                                        {isZh ? '导出本地 PDF 报告' : 'Export PDF Report'}
+                                    </button>
                                 </div>
 
                                 {/* FREE Preview Section */}

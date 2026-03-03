@@ -3,7 +3,8 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import { currentUser } from '@clerk/nextjs/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { calculateBaziChart, getStrategicContext } from '@/lib/bazi';
+import { calculateFusionChart } from '@/lib/fusion';
+import { calculateBaziChart } from '@/lib/bazi';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -55,42 +56,130 @@ export async function POST(req: Request) {
         .eq('id', user.id)
         .single();
 
-    if (!dbUser || dbUser.credits <= 0) {
+    let activeUser = dbUser;
+    if (!activeUser) {
+        // Auto-create user record with free defaults
+        const { data: newUser, error: createErr } = await supabaseAdmin
+            .from('users')
+            .upsert({
+                id: user.id,
+                email: user.emailAddresses[0]?.emailAddress || '',
+                plan: 'free',
+                credits: 5,
+            }, { onConflict: 'id' })
+            .select()
+            .single();
+        if (createErr || !newUser) {
+            console.error('Failed to auto-create user', createErr);
+            return new Response('Failed to initialize user', { status: 500 });
+        }
+        activeUser = newUser;
+    }
+
+    // At this point activeUser is guaranteed non-null (early return above if creation fails)
+    const au = activeUser!;
+
+    const isDev = process.env.NODE_ENV === 'development';
+
+    if (!isDev && au.credits <= 0) {
         return new Response('Insufficient credits', { status: 403 });
     }
 
-    // Deduct 1 credit (upfront for MVP)
-    if (dbUser.plan !== 'ultra') {
+    // Deduct 1 credit (skip in dev mode)
+    if (!isDev && au.plan !== 'ultra') {
         await supabaseAdmin
             .from('users')
-            .update({ credits: dbUser.credits - 1 })
+            .update({ credits: au.credits - 1 })
             .eq('id', user.id);
     }
 
-    const { messages } = await req.json();
+    const body = await req.json();
+    const { messages, sessionId: clientSessionId } = body;
+    const chatSessionId = clientSessionId || `session_${Date.now()}`;
 
-    // 2. Calculate real Bazi chart if birth data is available
-    let baziContext = 'User has not provided birth data. Provide general cycle advice based on current cosmic transits.';
-    if (dbUser.birth_date) {
+    // 2. Calculate fusion chart if birth data is available
+    let fusionContextStr = 'User has not provided birth data. Provide general cycle advice based on current cosmic transits.';
+    if (au.birth_date) {
         try {
-            const chart = calculateBaziChart(dbUser.birth_date, dbUser.birth_time || undefined);
-            baziContext = getStrategicContext(chart);
+            const chart = calculateFusionChart(au.birth_date, au.birth_time || undefined, 'M');
+            fusionContextStr = chart.fusionContext;
         } catch (e) {
-            console.error('Bazi calculation failed:', e);
+            console.error('Fusion calculation failed:', e);
         }
     }
 
+    // 3. Fetch extended profile and conversation memory
+    let extendedProfileContext = '';
+    const { data: extendedProfile } = await supabaseAdmin
+        .from('user_profiles_extended')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+    if (extendedProfile) {
+        extendedProfileContext = `
+EXTENDED AI MEMORY (Do not explicitly mention you are reading this unless relevant):
+- Personality Tags: ${extendedProfile.personality_tags?.join(', ') || 'None'}
+- Life Themes / Focus Areas: ${JSON.stringify(extendedProfile.life_themes || {})}
+`;
+    }
+
+    const now = new Date();
+    const currentDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
     const userContext = `
+CURRENT DATE: ${currentDate}
+
 USER PROFILE:
 - Name: ${user.firstName || 'Unknown'}
-- Birth Date: ${dbUser.birth_date || 'Not provided'}
-- Birth Time: ${dbUser.birth_time || 'Not provided'}
-- Birth Location: ${dbUser.birth_location || 'Not provided'}
-- Subscription Plan: ${dbUser.plan || 'free'}
+- Birth Date: ${au.birth_date || 'Not provided'}
+- Birth Time: ${au.birth_time || 'Not provided'}
+- Birth Location: ${au.birth_location || 'Not provided'}
+- Subscription Plan: ${au.plan || 'free'}
+${extendedProfileContext}
 `;
 
-    // 3. Stream with enhanced system prompt
+    // 4. Stream with enhanced system prompt
     const result = await streamTextWithFallback({
+        // @ts-ignore
+        onFinish: async (event: any) => {
+            // Save conversation memory to Supabase
+            try {
+                // Append AI's response
+                const fullConversation = [...messages, { role: 'assistant', content: event.text }];
+                const trimmedConversation = fullConversation.slice(-30);
+
+                // Check if session already exists (to preserve user-renamed summary)
+                const { data: existing } = await supabaseAdmin
+                    .from('conversation_memory')
+                    .select('summary')
+                    .eq('user_id', user.id)
+                    .eq('session_id', chatSessionId)
+                    .single();
+
+                // Auto-generate summary only if no existing one
+                let summary = existing?.summary;
+                if (!summary) {
+                    const firstUserMsg = messages.find((m: any) => m.role === 'user')?.content || '';
+                    summary = firstUserMsg.slice(0, 50) + (firstUserMsg.length > 50 ? '...' : '');
+                }
+
+                // Delete old record, insert new
+                await supabaseAdmin.from('conversation_memory')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('session_id', chatSessionId);
+
+                await supabaseAdmin.from('conversation_memory').insert({
+                    user_id: user.id,
+                    session_id: chatSessionId,
+                    messages: trimmedConversation,
+                    summary,
+                });
+            } catch (err) {
+                console.error('[AI Memory] Failed to store conversation:', err);
+            }
+        },
         system: `You are the RAYOY AI — an elite Strategic Timing Advisor.
 
 IDENTITY & MISSION:
@@ -106,41 +195,36 @@ CORE PRINCIPLES:
 COMMUNICATION STYLE:
 - Precise, confident, and concise
 - Use structured formatting (bullet points, headers) for clarity
+- Use emoji moderately to make responses more engaging and scannable (e.g. 🔥 for fire element, 💧 for water, 🌲 for wood, ⛰️ for earth, ⚙️ for metal, 📊 for analysis, ⚠️ for warnings, ✅ for recommendations, 🎯 for key points)
 - Reference specific Bazi concepts when relevant (Day Master, Five Elements, Luck Pillars)
 - If the user writes in Chinese, respond in Chinese. If in English, respond in English. Match their language.
 
 TOOLS:
-- Use calculateBazi FIRST when a user asks about their chart, cycle, or timing
+- Use calculateAstrologyFusion FIRST when a user asks about their chart, cycle, or timing. It provides both Bazi and Ziwei Dou Shu in one call.
 - Use drawTarot when a user asks for short-term tactical guidance
 - Use generateDailyForecast for quick daily check-ins
 
 ${userContext}
-${baziContext}
+${fusionContextStr}
 `,
         messages,
         tools: {
-            calculateBazi: tool({
-                description: 'Calculate the Four Pillars (Bazi) chart for the user based on their birth data. Use this to analyze long-term structural cycles, elemental balance, and current Year transit alignment.',
+            calculateAstrologyFusion: tool({
+                description: 'Calculate the integrated Astrology Fusion chart (Bazi + Ziwei Dou Shu) for the user. Use this to analyze long-term structural cycles, elemental balance, and deep palace-based analysis. Crucial for life planning, career strategy, and identifying major action windows.',
                 parameters: z.object({
                     date: z.string().describe('Birth date in YYYY-MM-DD format'),
                     time: z.string().optional().describe('Birth time in HH:mm format (24h)'),
+                    gender: z.enum(['M', 'F']).optional().describe('Gender assigned at birth'),
                 }),
-                execute: async ({ date, time }) => {
+                execute: async ({ date, time, gender }) => {
                     try {
-                        const chart = calculateBaziChart(date, time);
+                        const chart = calculateFusionChart(date, time, gender || 'M');
                         return {
-                            fourPillars: `${chart.yearPillar.stem}${chart.yearPillar.branch} ${chart.monthPillar.stem}${chart.monthPillar.branch} ${chart.dayPillar.stem}${chart.dayPillar.branch}${chart.hourPillar ? ` ${chart.hourPillar.stem}${chart.hourPillar.branch}` : ''}`,
-                            fourPillarsEn: `${chart.yearPillar.stemEn}${chart.yearPillar.branchEn} ${chart.monthPillar.stemEn}${chart.monthPillar.branchEn} ${chart.dayPillar.stemEn}${chart.dayPillar.branchEn}${chart.hourPillar ? ` ${chart.hourPillar.stemEn}${chart.hourPillar.branchEn}` : ''}`,
-                            dayMaster: `${chart.dayMaster.stemEn} (${chart.dayMaster.elementEn} ${chart.dayMaster.polarity})`,
-                            zodiac: `${chart.zodiac.en} (${chart.zodiac.zh})`,
-                            elementBalance: chart.elementBalance,
-                            dominantElement: `${chart.dominantElement.en} (${chart.dominantElement.zh})`,
-                            weakestElement: `${chart.weakestElement.en} (${chart.weakestElement.zh})`,
-                            currentYearTransit: `${chart.currentYearTransit.stemEn} ${chart.currentYearTransit.branchEn} (${chart.currentYearTransit.stem}${chart.currentYearTransit.branch})`,
-                            strategicContext: getStrategicContext(chart),
+                            info: "Successfully calculated Fusion Chart. Check strategic context for detailed Bazi + Ziwei cross-validated synthesis.",
+                            strategicContext: chart.fusionContext,
                         };
                     } catch (e) {
-                        return { error: 'Invalid date/time format. Please provide date as YYYY-MM-DD and time as HH:mm.' };
+                        return { error: 'Invalid date/time format or calculation failed.' };
                     }
                 },
             }),
@@ -206,6 +290,8 @@ ${baziContext}
                     };
                 },
             }),
+
+
         },
     });
 
