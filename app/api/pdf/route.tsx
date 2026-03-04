@@ -296,8 +296,8 @@ const GraphicReportDocument = ({
                 {/* BENTO GRID */}
                 <View style={styles.bentoGrid}>
 
-                    {/* BAZI (HALF) */}
-                    <View style={styles.cardHalf}>
+                    {/* BAZI (DYNAMIC WIDTH) */}
+                    <View style={chartData.ziwei ? styles.cardHalf : styles.cardFull}>
                         <View style={styles.cardHeader}>
                             <Text style={styles.cardTitle}>{isZh ? '四柱原局' : 'Four Pillars (Bazi)'}</Text>
                             <Text style={styles.cardBadge}>Identity Map</Text>
