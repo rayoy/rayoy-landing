@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { type Locale, type Translations, translations } from './i18n';
 import { type AppTranslations, appTranslations } from './app-i18n';
 
@@ -13,14 +13,17 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-function getInitialLocale(): Locale {
-    if (typeof window === 'undefined') return 'en';
-    const cookie = document.cookie.split('; ').find(c => c.startsWith('locale='));
-    return (cookie?.split('=')[1] as Locale) || 'en';
-}
-
 export function LanguageProvider({ children }: { children: ReactNode }) {
-    const [locale, setLocaleState] = useState<Locale>(getInitialLocale);
+    // Always start with 'zh-CN' to match SSR, then sync from cookie on mount
+    const [locale, setLocaleState] = useState<Locale>('zh-CN');
+
+    useEffect(() => {
+        const cookie = document.cookie.split('; ').find(c => c.startsWith('locale='));
+        const saved = cookie?.split('=')[1] as Locale | undefined;
+        if (saved && saved !== 'zh-CN') {
+            setLocaleState(saved);
+        }
+    }, []);
 
     const setLocale = useCallback((newLocale: Locale) => {
         setLocaleState(newLocale);

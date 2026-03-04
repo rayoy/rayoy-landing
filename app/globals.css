@@ -68,3 +68,11 @@ body {
   color: #a5b4fc;
   font-family: monospace;
 }
+
+/* Report text overflow safety */
+.overflow-wrap-anywhere {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
