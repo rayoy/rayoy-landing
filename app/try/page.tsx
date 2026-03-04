@@ -80,6 +80,7 @@ interface TrialResult {
         dominantElement: { zh: string; en: string };
         weakestElement: { zh: string; en: string };
     };
+    chartData?: any;
     imageUrl?: string | null;
 }
 
@@ -463,7 +464,7 @@ export default function TryPage() {
             input.value = JSON.stringify({
                 birthDate,
                 birthTime: birthTime || undefined,
-                chartData: result.chartData,
+                chartData: result?.chartData,
                 userName,
                 locale,
                 freeReport: result?.freeReport,
