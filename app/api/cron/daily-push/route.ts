@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { generateTextWithFallback } from '@/lib/ai-provider';
 import { calculateBaziChart } from '@/lib/bazi';
+import { getPrompt } from '@/lib/langfuse';
 
 // Vercel Cron syntax: Add to vercel.json -> "crons": [{ "path": "/api/cron/daily-push", "schedule": "0 8 * * *" }]
 export async function GET(req: Request) {
@@ -35,20 +36,26 @@ export async function GET(req: Request) {
         // 3. Generate actionable insights per user
         for (const profile of profiles) {
             try {
-                const systemPrompt = `You are RAYOY AI, an elite strategic advisor.
+                const fallbackSystem = `You are RAYOY AI, an elite strategic advisor.
 Analyze today's energy against the user's structural map and personality tags.
 Provide a hyper-personalized, punchy daily push notification (max 2 short sentences).
 Tone: Authoritative, predictive, actionable. NO fluff.`;
 
-                const userPrompt = `
-USER MAP SUMMARY:
-${profile.fusion_context ? profile.fusion_context.substring(0, 1000) : 'No specific map provided.'}
-TAGS: ${profile.personality_tags?.join(', ') || 'General'}
+                const fallbackUser = `USER MAP SUMMARY:
+{{fusionContext}}
+TAGS: {{personalityTags}}
 
 TODAY'S TRANSIT:
-${globalTransit}
+{{globalTransit}}
 
 Task: Generate today's specific push notification text.`;
+
+                const systemPrompt = await getPrompt('daily-push-system', {}, fallbackSystem);
+                const userPrompt = await getPrompt('daily-push-user', {
+                    fusionContext: profile.fusion_context ? profile.fusion_context.substring(0, 1000) : 'No specific map provided.',
+                    personalityTags: profile.personality_tags?.join(', ') || 'General',
+                    globalTransit,
+                }, fallbackUser);
 
                 const result = await generateTextWithFallback({
                     system: systemPrompt,

@@ -1,87 +1,88 @@
 import { generateTextWithFallback, proxyGenerateImage } from '@/lib/ai-provider';
 import { calculateFusionChart } from '@/lib/fusion';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getPrompt } from '@/lib/langfuse';
 
 export interface ReportSection {
-    title: string;
-    professional: string;
-    plain: string;
+  title: string;
+  professional: string;
+  plain: string;
 }
 
 export interface StructuredReport {
-    identity: ReportSection;
-    currentCycle: ReportSection;
-    riskAssessment: {
-        level: 'low' | 'medium' | 'high';
-        title: string;
-        professional: string;
-        plain: string;
-    };
-    // Locked sections (premium)
-    actions?: {
-        title: string;
-        items: Array<{
-            label: string;
-            professional: string;
-            plain: string;
-        }>;
-    };
-    timing?: {
-        title: string;
-        windows: Array<{
-            period: string;
-            focus: string;
-            detail: string;
-        }>;
-    };
-    elementStrategy?: ReportSection;
-    decisionAnalysis?: ReportSection;
+  identity: ReportSection;
+  currentCycle: ReportSection;
+  riskAssessment: {
+    level: 'low' | 'medium' | 'high';
+    title: string;
+    professional: string;
+    plain: string;
+  };
+  // Locked sections (premium)
+  actions?: {
+    title: string;
+    items: Array<{
+      label: string;
+      professional: string;
+      plain: string;
+    }>;
+  };
+  timing?: {
+    title: string;
+    windows: Array<{
+      period: string;
+      focus: string;
+      detail: string;
+    }>;
+  };
+  elementStrategy?: ReportSection;
+  decisionAnalysis?: ReportSection;
 }
 
 export async function POST(req: Request) {
-    const body = await req.json();
-    const { birthDate, birthTime, birthCity, currentConcern, locale } = body;
+  const body = await req.json();
+  const { birthDate, birthTime, birthCity, currentConcern, locale } = body;
 
-    if (!birthDate) {
-        return new Response('Birth date is required', { status: 400 });
-    }
+  if (!birthDate) {
+    return new Response('Birth date is required', { status: 400 });
+  }
 
-    let fusionChart;
-    try {
-        fusionChart = calculateFusionChart(birthDate, birthTime || undefined, 'M');
-    } catch (e) {
-        console.error('Fusion calculation error:', e);
-        return new Response('Invalid birth date/time', { status: 400 });
-    }
+  let fusionChart;
+  try {
+    fusionChart = calculateFusionChart(birthDate, birthTime || undefined, 'M');
+  } catch (e) {
+    console.error('Fusion calculation error:', e);
+    return new Response('Invalid birth date/time', { status: 400 });
+  }
 
-    const chart = fusionChart.bazi;
+  const chart = fusionChart.bazi;
 
-    const chartResponse = {
-        fourPillars: `${chart.yearPillar.stem}${chart.yearPillar.branch} ${chart.monthPillar.stem}${chart.monthPillar.branch} ${chart.dayPillar.stem}${chart.dayPillar.branch}${chart.hourPillar ? ` ${chart.hourPillar.stem}${chart.hourPillar.branch}` : ''}`,
-        dayMaster: `${chart.dayMaster.stem} ${chart.dayMaster.stemEn} (${chart.dayMaster.elementEn} ${chart.dayMaster.polarity})`,
-        zodiac: `${chart.zodiac.zh} ${chart.zodiac.en}`,
-        dominantElement: chart.dominantElement,
-        weakestElement: chart.weakestElement,
-    };
+  const chartResponse = {
+    fourPillars: `${chart.yearPillar.stem}${chart.yearPillar.branch} ${chart.monthPillar.stem}${chart.monthPillar.branch} ${chart.dayPillar.stem}${chart.dayPillar.branch}${chart.hourPillar ? ` ${chart.hourPillar.stem}${chart.hourPillar.branch}` : ''}`,
+    dayMaster: `${chart.dayMaster.stem} ${chart.dayMaster.stemEn} (${chart.dayMaster.elementEn} ${chart.dayMaster.polarity})`,
+    zodiac: `${chart.zodiac.zh} ${chart.zodiac.en}`,
+    dominantElement: chart.dominantElement,
+    weakestElement: chart.weakestElement,
+  };
 
-    let freeReport: Pick<StructuredReport, 'identity' | 'currentCycle' | 'riskAssessment'> | null = null;
-    let lockedReport: Pick<StructuredReport, 'actions' | 'timing' | 'elementStrategy' | 'decisionAnalysis'> | null = null;
-    let imageUrl: string | null = null;
+  let freeReport: Pick<StructuredReport, 'identity' | 'currentCycle' | 'riskAssessment'> | null = null;
+  let lockedReport: Pick<StructuredReport, 'actions' | 'timing' | 'elementStrategy' | 'decisionAnalysis'> | null = null;
+  let imageUrl: string | null = null;
 
-    try {
-        const strategicContext = fusionChart.fusionContext;
+  try {
+    const strategicContext = fusionChart.fusionContext;
 
-        const isZh = locale?.startsWith('zh');
-        const languageInstruction = isZh
-            ? 'You MUST respond ONLY in Chinese (简体中文). All title, professional, plain fields must be in Chinese.'
-            : 'You MUST respond ONLY in English. All title, professional, plain fields must be in English.';
+    const isZh = locale?.startsWith('zh');
+    const languageInstruction = isZh
+      ? 'You MUST respond ONLY in Chinese (简体中文). All title, professional, plain fields must be in Chinese.'
+      : 'You MUST respond ONLY in English. All title, professional, plain fields must be in English.';
 
-        const personalContext = [
-            birthCity ? `Birth City: ${birthCity}` : null,
-            currentConcern ? `Current Decision/Concern: ${currentConcern}` : null,
-        ].filter(Boolean).join('\n');
+    const personalContext = [
+      birthCity ? `Birth City: ${birthCity}` : null,
+      currentConcern ? `Current Decision/Concern: ${currentConcern}` : null,
+    ].filter(Boolean).join('\n');
 
-        const exampleJson = isZh ? `{
+    const exampleJson = isZh ? `{
   "identity": {
     "title": "甲木命主 · 阳木之力",
     "professional": "日主甲木，阳干，五行属木。甲木为栋梁之木，性刚毅而上进，具备领导力与开拓精神。在命局中...",
@@ -117,7 +118,7 @@ export async function POST(req: Request) {
   }
 }`;
 
-        const lockedExampleJson = isZh ? `{
+    const lockedExampleJson = isZh ? `{
   "actions": {
     "title": "行动建议",
     "items": [
@@ -171,8 +172,30 @@ export async function POST(req: Request) {
   }
 }`;
 
-        const result = await generateTextWithFallback({
-            system: `You are the Rayoy AI cycle intelligence engine. You generate structured analysis reports.
+    // ─── Build prompt variables ─────────────────────────────────────
+    const decisionAnalysisNote = currentConcern ? ', decisionAnalysis' : '';
+    const decisionAnalysisInstruction = currentConcern
+      ? '- decisionAnalysis: has "title", "professional", "plain" — address the user\'s specific concern'
+      : '';
+
+    const promptVars = {
+      exampleJson,
+      lockedExampleJson,
+      languageInstruction,
+      decisionAnalysisNote,
+      decisionAnalysisInstruction,
+    };
+
+    const userPromptVars = {
+      strategicContext,
+      birthDate,
+      birthTimeNote: birthTime ? `Birth Time: ${birthTime}` : 'Birth time not provided',
+      personalContext,
+      currentDate: new Date().toLocaleDateString(),
+    };
+
+    // ─── Hardcoded fallbacks (used when LangFuse is unavailable) ─────
+    const fallbackSystem = `You are the Rayoy AI cycle intelligence engine. You generate structured analysis reports.
 
 CRITICAL: You MUST return ONLY valid JSON. No markdown, no code fences, no extra text. Just the JSON object.
 
@@ -184,109 +207,118 @@ Each has "title", "professional" (technical metaphysics explanation, 2-3 sentenc
 riskAssessment also has a "level" field: "low", "medium", or "high".
 
 Example format for Section 1:
-${exampleJson}
+{{exampleJson}}
 
 ---LOCKED---
 
 SECTION 2 (PREMIUM — behind paywall):
-Return a JSON object with: actions, timing, elementStrategy${currentConcern ? ', decisionAnalysis' : ''}.
+Return a JSON object with: actions, timing, elementStrategy{{decisionAnalysisNote}}.
 - actions: has "title" and "items" array, each item has "label", "professional", "plain"
 - timing: has "title" and "windows" array, each window has "period", "focus", "detail"
 - elementStrategy: has "title", "professional", "plain"
-${currentConcern ? '- decisionAnalysis: has "title", "professional", "plain" — address the user\'s specific concern' : ''}
+{{decisionAnalysisInstruction}}
 
 Example format for Section 2:
-${lockedExampleJson}
+{{lockedExampleJson}}
 
 Keep Section 1 concise (each field 1-3 sentences). Section 2 can be more detailed.
 Be specific — reference their actual elements, stars, and cycle data. No generic fluff.
-${languageInstruction}`,
-            prompt: `Generate a cycle analysis report for this user:
-${strategicContext}
-Birth Date: ${birthDate}
-${birthTime ? `Birth Time: ${birthTime}` : 'Birth time not provided'}
-${personalContext}
-Current Date: ${new Date().toLocaleDateString()}.`,
-        });
+{{languageInstruction}}`;
 
-        const fullText = result.text;
+    const fallbackUser = `Generate a cycle analysis report for this user:
+{{strategicContext}}
+Birth Date: {{birthDate}}
+{{birthTimeNote}}
+{{personalContext}}
+Current Date: {{currentDate}}.`;
 
-        // Parse the two JSON sections
-        const parts = fullText.split('---LOCKED---');
-        const freeText = parts[0]?.trim() || '';
-        const lockedText = parts[1]?.trim() || '';
+    // ─── Fetch prompts (LangFuse → fallback) ────────────────────────
+    const systemPrompt = await getPrompt('trial-system', promptVars, fallbackSystem);
+    const userPrompt = await getPrompt('trial-user', userPromptVars, fallbackUser);
 
-        // Clean potential markdown code fences from AI response
-        const cleanJson = (text: string): string => {
-            return text
-                .replace(/^```json\s*/i, '')
-                .replace(/^```\s*/i, '')
-                .replace(/\s*```$/i, '')
-                .trim();
-        };
+    const result = await generateTextWithFallback({
+      system: systemPrompt,
+      prompt: userPrompt,
+    });
 
-        try {
-            freeReport = JSON.parse(cleanJson(freeText));
-        } catch (parseErr) {
-            console.error('Failed to parse free report JSON, falling back:', parseErr);
-            // Fallback: wrap raw text as identity
-            freeReport = {
-                identity: {
-                    title: isZh ? '命理分析' : 'Cycle Analysis',
-                    professional: freeText.slice(0, 200),
-                    plain: freeText.slice(0, 200),
-                },
-                currentCycle: {
-                    title: isZh ? '当前周期' : 'Current Cycle',
-                    professional: '',
-                    plain: '',
-                },
-                riskAssessment: {
-                    level: 'medium' as const,
-                    title: isZh ? '风险评估' : 'Risk Assessment',
-                    professional: '',
-                    plain: '',
-                },
-            };
-        }
+    const fullText = result.text;
 
-        try {
-            if (lockedText) {
-                lockedReport = JSON.parse(cleanJson(lockedText));
-            }
-        } catch (parseErr) {
-            console.error('Failed to parse locked report JSON:', parseErr);
-            lockedReport = null;
-        }
+    // Parse the two JSON sections
+    const parts = fullText.split('---LOCKED---');
+    const freeText = parts[0]?.trim() || '';
+    const lockedText = parts[1]?.trim() || '';
 
-        // Generate illustration in parallel
-        const imagePrompt = `A highly professional, elegant, minimalist vector illustration representing the Chinese element of ${chart.dominantElement.en}, balanced with ${chart.weakestElement.en}, subtle cosmic energy, dark background, premium ui aesthetic, concept art, high quality.`;
-        imageUrl = await proxyGenerateImage(imagePrompt);
+    // Clean potential markdown code fences from AI response
+    const cleanJson = (text: string): string => {
+      return text
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/\s*```$/i, '')
+        .trim();
+    };
 
-    } catch (error) {
-        console.error('AI generation failed (returning chart without AI preview):', error);
+    try {
+      freeReport = JSON.parse(cleanJson(freeText));
+    } catch (parseErr) {
+      console.error('Failed to parse free report JSON, falling back:', parseErr);
+      // Fallback: wrap raw text as identity
+      freeReport = {
+        identity: {
+          title: isZh ? '命理分析' : 'Cycle Analysis',
+          professional: freeText.slice(0, 200),
+          plain: freeText.slice(0, 200),
+        },
+        currentCycle: {
+          title: isZh ? '当前周期' : 'Current Cycle',
+          professional: '',
+          plain: '',
+        },
+        riskAssessment: {
+          level: 'medium' as const,
+          title: isZh ? '风险评估' : 'Risk Assessment',
+          professional: '',
+          plain: '',
+        },
+      };
     }
 
-    // Save to Supabase (fire-and-forget)
-    supabaseAdmin
-        .from('trial_submissions')
-        .insert({
-            birth_date: birthDate,
-            birth_time: birthTime || null,
-            birth_city: birthCity || null,
-            current_concern: currentConcern || null,
-            locale: locale || 'en',
-            chart_data: chartResponse,
-            ai_preview: freeReport ? JSON.stringify(freeReport) : null,
-        })
-        .then(({ error }) => {
-            if (error) console.error('Failed to save trial submission:', error);
-        });
+    try {
+      if (lockedText) {
+        lockedReport = JSON.parse(cleanJson(lockedText));
+      }
+    } catch (parseErr) {
+      console.error('Failed to parse locked report JSON:', parseErr);
+      lockedReport = null;
+    }
 
-    return Response.json({
-        freeReport,
-        lockedReport,
-        chart: chartResponse,
-        imageUrl,
+    // Generate illustration in parallel
+    const imagePrompt = `A highly professional, elegant, minimalist vector illustration representing the Chinese element of ${chart.dominantElement.en}, balanced with ${chart.weakestElement.en}, subtle cosmic energy, dark background, premium ui aesthetic, concept art, high quality.`;
+    imageUrl = await proxyGenerateImage(imagePrompt);
+
+  } catch (error) {
+    console.error('AI generation failed (returning chart without AI preview):', error);
+  }
+
+  // Save to Supabase (fire-and-forget)
+  supabaseAdmin
+    .from('trial_submissions')
+    .insert({
+      birth_date: birthDate,
+      birth_time: birthTime || null,
+      birth_city: birthCity || null,
+      current_concern: currentConcern || null,
+      locale: locale || 'en',
+      chart_data: chartResponse,
+      ai_preview: freeReport ? JSON.stringify(freeReport) : null,
+    })
+    .then(({ error }) => {
+      if (error) console.error('Failed to save trial submission:', error);
     });
+
+  return Response.json({
+    freeReport,
+    lockedReport,
+    chart: chartResponse,
+    imageUrl,
+  });
 }

@@ -15,6 +15,7 @@
     "@clerk/nextjs": "^6.38.0",
     "@clerk/themes": "^2.4.54",
     "@google/generative-ai": "^0.24.1",
+    "@langfuse/client": "^4.6.1",
     "@react-pdf/renderer": "^4.3.2",
     "@supabase/supabase-js": "^2.97.0",
     "ai": "^4.1.45",
