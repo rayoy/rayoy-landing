@@ -5,8 +5,11 @@
  * and mark them as "production".
  *
  * Usage:
- *   LANGFUSE_SECRET_KEY=... LANGFUSE_PUBLIC_KEY=... npx tsx scripts/seed-langfuse-prompts.ts
+ *   npx tsx scripts/seed-langfuse-prompts.ts
  */
+
+import { config } from 'dotenv';
+config({ path: '.env.local' });
 
 import { LangfuseClient } from '@langfuse/client';
 

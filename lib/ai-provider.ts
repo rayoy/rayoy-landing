@@ -4,11 +4,15 @@ import { generateText, streamText } from 'ai';
 // Text Models
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const googleModel = () => google('models/gemini-2.0-flash') as any;
+const KIMI_MODEL = 'moonshot-v1-8k';
 const XIAOCHI_MODEL = 'gemini-3-flash';
 const VECTOR_TEXT_MODEL = 'gemini-3-flash-preview';
 const VECTOR_IMAGE_MODEL = 'gemini-3.1-flash-image-preview';
 
 // Proxy Configurations
+const KIMI_URL = 'https://api.kimi.com/coding/v1/chat/completions';
+const KIMI_KEY = () => process.env.KIMI_API_KEY || '';
+
 const XIAOCHI_URL = 'https://llm.xiaochisaas.com/v1/chat/completions';
 const XIAOCHI_KEY = () => process.env.GEMINI_PROXY_API_KEY || '';
 
@@ -28,6 +32,31 @@ function isQuotaError(err: any): boolean {
         msg.includes('ECONNRESET') ||
         err?.name === 'AI_APICallError'
     );
+}
+
+/**
+ * Raw fetch to Kimi / Moonshot AI (OpenAI-compatible format)
+ */
+async function proxyGenerateTextKimi(system: string, prompt: string): Promise<string> {
+    const res = await fetch(KIMI_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${KIMI_KEY()}`,
+        },
+        body: JSON.stringify({
+            model: KIMI_MODEL,
+            messages: [
+                { role: 'system', content: system },
+                { role: 'user', content: prompt },
+            ],
+            temperature: 0,
+        }),
+    });
+
+    if (!res.ok) throw new Error(`Kimi error ${res.status}: ${await res.text()}`);
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || '';
 }
 
 /**
@@ -122,20 +151,30 @@ export async function proxyGenerateImage(prompt: string): Promise<string | null>
 }
 
 /**
- * Fallback orchestrator for text generation: VectorEngine -> Xiaochi
+ * Fallback orchestrator: Kimi → VectorEngine → Xiaochi
  */
-async function generateTextDualProxy(system: string, prompt: string): Promise<string> {
-    // Try VectorEngine first (Native Gemini format)
+async function generateTextProxyCascade(system: string, prompt: string): Promise<string> {
+    // 1. Try Kimi first (OpenAI-compatible)
+    if (KIMI_KEY()) {
+        try {
+            console.warn('[AI Fallback] Trying Kimi (Moonshot)...');
+            return await proxyGenerateTextKimi(system, prompt);
+        } catch (e) {
+            console.error('[AI Fallback] Kimi failed:', e);
+        }
+    }
+
+    // 2. Try VectorEngine (Native Gemini format)
     if (VECTOR_KEY()) {
         try {
             console.warn('[AI Fallback] Trying VectorEngine Proxy text model...');
             return await proxyGenerateTextVector(system, prompt);
         } catch (e) {
-            console.error('[AI Fallback] VectorEngine failed, falling back to Xiaochi:', e);
+            console.error('[AI Fallback] VectorEngine failed:', e);
         }
     }
 
-    // Fallback to Xiaochi (OpenAI format)
+    // 3. Fallback to Xiaochi (OpenAI format)
     if (XIAOCHI_KEY()) {
         console.warn('[AI Fallback] Trying Xiaochi Proxy text model...');
         return await proxyGenerateTextXiaochi(system, prompt);
@@ -146,7 +185,7 @@ async function generateTextDualProxy(system: string, prompt: string): Promise<st
 
 
 /**
- * generateText: Google first → VectorEngine → Xiaochi
+ * generateText: Google first → Kimi → VectorEngine → Xiaochi
  * maxRetries: 0 on Google so we fail fast to fallback
  */
 export async function generateTextWithFallback(
@@ -157,7 +196,7 @@ export async function generateTextWithFallback(
     } catch (err: any) {
         if (isQuotaError(err) || err.name === 'AI_RetryError') {
             console.warn('[AI] Google quota exceeded, initializing proxy cascade');
-            const text = await generateTextDualProxy(
+            const text = await generateTextProxyCascade(
                 String(opts.system || ''),
                 String(opts.prompt || ''),
             );
@@ -168,7 +207,7 @@ export async function generateTextWithFallback(
 }
 
 /**
- * streamText: Google first → VectorEngine → Xiaochi
+ * streamText: Google first → Kimi → VectorEngine → Xiaochi
  * Note: proxy fallback for stream is non-streaming (returns full text)
  */
 export async function streamTextWithFallback(
@@ -179,7 +218,7 @@ export async function streamTextWithFallback(
     } catch (err: any) {
         if (isQuotaError(err) || err.name === 'AI_RetryError') {
             console.warn('[AI] Google quota exceeded, initializing proxy cascade (non-stream)');
-            const text = await generateTextDualProxy(
+            const text = await generateTextProxyCascade(
                 String(opts.system || ''),
                 String(opts.prompt || (opts as any).messages?.filter((m: any) => m.role === 'user').pop()?.content || ''),
             );
