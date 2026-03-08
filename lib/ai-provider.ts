@@ -4,7 +4,7 @@ import { generateText, streamText } from 'ai';
 // Text Models
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const googleModel = () => google('models/gemini-2.0-flash') as any;
-const KIMI_MODEL = 'moonshot-v1-8k';
+const KIMI_MODEL = 'kimi-k2.5';
 const XIAOCHI_MODEL = 'gemini-3-flash';
 const VECTOR_TEXT_MODEL = 'gemini-3-flash-preview';
 const VECTOR_IMAGE_MODEL = 'gemini-3.1-flash-image-preview';
