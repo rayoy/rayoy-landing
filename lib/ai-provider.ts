@@ -4,14 +4,14 @@ import { generateText, streamText } from 'ai';
 // Text Models
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const googleModel = () => google('models/gemini-2.0-flash') as any;
-const KIMI_MODEL = 'kimi-k2.5';
+const DEEPSEEK_MODEL = 'deepseek-chat';
 const XIAOCHI_MODEL = 'gemini-3-flash';
 const VECTOR_TEXT_MODEL = 'gemini-3-flash-preview';
 const VECTOR_IMAGE_MODEL = 'gemini-3.1-flash-image-preview';
 
 // Proxy Configurations
-const KIMI_URL = 'https://api.kimi.com/coding/v1/chat/completions';
-const KIMI_KEY = () => process.env.KIMI_API_KEY || '';
+const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions';
+const DEEPSEEK_KEY = () => process.env.DEEPSEEK_API_KEY || '';
 
 const XIAOCHI_URL = 'https://llm.xiaochisaas.com/v1/chat/completions';
 const XIAOCHI_KEY = () => process.env.GEMINI_PROXY_API_KEY || '';
@@ -35,17 +35,17 @@ function isQuotaError(err: any): boolean {
 }
 
 /**
- * Raw fetch to Kimi / Moonshot AI (OpenAI-compatible format)
+ * Raw fetch to DeepSeek (OpenAI-compatible format)
  */
-async function proxyGenerateTextKimi(system: string, prompt: string): Promise<string> {
-    const res = await fetch(KIMI_URL, {
+async function proxyGenerateTextDeepSeek(system: string, prompt: string): Promise<string> {
+    const res = await fetch(DEEPSEEK_URL, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${KIMI_KEY()}`,
+            Authorization: `Bearer ${DEEPSEEK_KEY()}`,
         },
         body: JSON.stringify({
-            model: KIMI_MODEL,
+            model: DEEPSEEK_MODEL,
             messages: [
                 { role: 'system', content: system },
                 { role: 'user', content: prompt },
@@ -54,7 +54,7 @@ async function proxyGenerateTextKimi(system: string, prompt: string): Promise<st
         }),
     });
 
-    if (!res.ok) throw new Error(`Kimi error ${res.status}: ${await res.text()}`);
+    if (!res.ok) throw new Error(`DeepSeek error ${res.status}: ${await res.text()}`);
     const data = await res.json();
     return data.choices?.[0]?.message?.content || '';
 }
@@ -151,16 +151,16 @@ export async function proxyGenerateImage(prompt: string): Promise<string | null>
 }
 
 /**
- * Fallback orchestrator: Kimi → VectorEngine → Xiaochi
+ * Fallback orchestrator: DeepSeek → VectorEngine → Xiaochi
  */
 async function generateTextProxyCascade(system: string, prompt: string): Promise<string> {
-    // 1. Try Kimi first (OpenAI-compatible)
-    if (KIMI_KEY()) {
+    // 1. Try DeepSeek first (OpenAI-compatible)
+    if (DEEPSEEK_KEY()) {
         try {
-            console.warn('[AI Fallback] Trying Kimi (Moonshot)...');
-            return await proxyGenerateTextKimi(system, prompt);
+            console.warn('[AI Fallback] Trying DeepSeek...');
+            return await proxyGenerateTextDeepSeek(system, prompt);
         } catch (e) {
-            console.error('[AI Fallback] Kimi failed:', e);
+            console.error('[AI Fallback] DeepSeek failed:', e);
         }
     }
 
@@ -185,7 +185,7 @@ async function generateTextProxyCascade(system: string, prompt: string): Promise
 
 
 /**
- * generateText: Google first → Kimi → VectorEngine → Xiaochi
+ * generateText: Google first → DeepSeek → VectorEngine → Xiaochi
  * maxRetries: 0 on Google so we fail fast to fallback
  */
 export async function generateTextWithFallback(
@@ -207,7 +207,7 @@ export async function generateTextWithFallback(
 }
 
 /**
- * streamText: Google first → Kimi → VectorEngine → Xiaochi
+ * streamText: Google first → DeepSeek → VectorEngine → Xiaochi
  * Note: proxy fallback for stream is non-streaming (returns full text)
  */
 export async function streamTextWithFallback(

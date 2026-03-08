@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
 // Hard-coded admin emails — add your email here
-const ADMIN_EMAILS = ['bookast@qq.com'];
+const ADMIN_EMAILS = ['ray@rayoy.com', 'admin@rayoy.com','bookast@qq.com'];
 
 export default async function AdminLayout({
     children,
