@@ -247,9 +247,9 @@ export default function AgentTerminal() {
                         </div>
                     )}
 
-                    {messages.map((message) => (
+                    {messages.map((message, idx) => (
                         <div
-                            key={message.id}
+                            key={message.id || `msg-${idx}`}
                             className={`py-5 px-4 ${message.role === 'user' ? 'bg-transparent' : 'bg-gray-950/40'}`}
                         >
                             {message.role === 'user' ? (

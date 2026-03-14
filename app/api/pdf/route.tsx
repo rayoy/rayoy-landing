@@ -11,6 +11,12 @@ Font.register({
     src: path.join(process.cwd(), 'public/fonts/SimHei.ttf'),
 });
 
+// Fix text wrapping for Chinese characters
+Font.registerHyphenationCallback((word) => {
+    // English words/numbers stay together, Chinese characters and punctuation can break individually
+    return word.match(/[a-zA-Z0-9]+|[\u4e00-\u9fa5]|[^a-zA-Z0-9\u4e00-\u9fa5]/g) || Array.from(word);
+});
+
 // ─── Styles ─────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({

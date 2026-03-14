@@ -109,3 +109,126 @@ export async function getChatPrompt(
 function compileFallback(template: string, variables: Record<string, string>): string {
     return template.replace(/\{\{(\w+)\}\}/g, (_, key) => variables[key] ?? '');
 }
+
+// ─── Lightweight Tracing (REST API) ─────────────────────────────────────
+// LangfuseClient v4 doesn't expose trace()/generation() directly.
+// We use the ingestion REST API to fire-and-forget trace + generation events.
+
+function langfuseAuthHeader(): string | null {
+    const pk = process.env.LANGFUSE_PUBLIC_KEY;
+    const sk = process.env.LANGFUSE_SECRET_KEY;
+    if (!pk || !sk) return null;
+    return 'Basic ' + Buffer.from(`${pk}:${sk}`).toString('base64');
+}
+
+function langfuseBaseUrl(): string {
+    return process.env.LANGFUSE_BASE_URL || 'https://cloud.langfuse.com';
+}
+
+function uuid(): string {
+    return crypto.randomUUID();
+}
+
+/**
+ * Fire-and-forget: send a batch of events to LangFuse ingestion API.
+ */
+function ingestBatch(events: any[]) {
+    const auth = langfuseAuthHeader();
+    if (!auth) return;
+
+    fetch(`${langfuseBaseUrl()}/api/public/ingestion`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: auth },
+        body: JSON.stringify({ batch: events }),
+    }).catch((err) => console.error('[LangFuse Trace] ingestion failed:', err));
+}
+
+export interface LfTrace {
+    traceId: string;
+    /** Record a generation (LLM call) within this trace */
+    generation(opts: {
+        name: string;
+        model: string;
+        input?: any;
+    }): LfGeneration;
+    /** End the trace with output */
+    end(output?: any): void;
+}
+
+export interface LfGeneration {
+    generationId: string;
+    /** End the generation with output + optional usage */
+    end(opts?: { output?: any; usage?: { promptTokens?: number; completionTokens?: number }; level?: string }): void;
+}
+
+/**
+ * Create a LangFuse trace. Returns a lightweight handle.
+ * If LangFuse is not configured, returns null.
+ */
+export function createTrace(name: string, input?: any): LfTrace | null {
+    if (!langfuseAuthHeader()) return null;
+
+    const traceId = uuid();
+    const startTime = new Date().toISOString();
+
+    ingestBatch([{
+        type: 'trace-create',
+        id: uuid(),
+        timestamp: startTime,
+        body: { id: traceId, name, input, timestamp: startTime },
+    }]);
+
+    return {
+        traceId,
+        generation({ name: genName, model, input: genInput }) {
+            const generationId = uuid();
+            const genStart = new Date().toISOString();
+
+            ingestBatch([{
+                type: 'generation-create',
+                id: uuid(),
+                timestamp: genStart,
+                body: {
+                    id: generationId,
+                    traceId,
+                    name: genName,
+                    model,
+                    input: genInput,
+                    startTime: genStart,
+                },
+            }]);
+
+            return {
+                generationId,
+                end(opts) {
+                    const endTime = new Date().toISOString();
+                    ingestBatch([{
+                        type: 'generation-update',
+                        id: uuid(),
+                        timestamp: endTime,
+                        body: {
+                            id: generationId,
+                            traceId,
+                            output: opts?.output,
+                            endTime,
+                            usage: opts?.usage ? {
+                                promptTokens: opts.usage.promptTokens,
+                                completionTokens: opts.usage.completionTokens,
+                            } : undefined,
+                            level: opts?.level,
+                        },
+                    }]);
+                },
+            };
+        },
+        end(output) {
+            const endTime = new Date().toISOString();
+            ingestBatch([{
+                type: 'trace-create',
+                id: uuid(),
+                timestamp: endTime,
+                body: { id: traceId, output, timestamp: endTime },
+            }]);
+        },
+    };
+}

@@ -39,7 +39,7 @@ export default function DailyPulse() {
                     </div>
                     <div>
                         <h3 className="text-sm font-bold text-indigo-400 uppercase tracking-widest">{t.title}</h3>
-                        <p className="text-xs text-indigo-400/50 mt-1 font-mono uppercase">{t.calculated}: {new Date().toLocaleDateString()}</p>
+                        <p className="text-xs text-indigo-400/50 mt-1 font-mono uppercase">{t.calculated}: {new Date().toLocaleDateString('en-CA')}</p>
                     </div>
                 </div>
                 <button

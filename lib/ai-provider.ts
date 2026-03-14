@@ -1,5 +1,6 @@
 import { google } from '@ai-sdk/google';
-import { generateText, streamText } from 'ai';
+import { generateText, streamText, createDataStreamResponse, type DataStreamWriter } from 'ai';
+import { createTrace, type LfTrace } from '@/lib/langfuse';
 
 // Text Models
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,7 +38,13 @@ function isQuotaError(err: any): boolean {
 /**
  * Raw fetch to DeepSeek (OpenAI-compatible format)
  */
-async function proxyGenerateTextDeepSeek(system: string, prompt: string): Promise<string> {
+async function proxyGenerateTextDeepSeek(system: string, prompt: string, parentTrace?: any): Promise<string> {
+    const span = parentTrace?.generation({
+        name: 'deepseek',
+        model: DEEPSEEK_MODEL,
+        input: { system, prompt },
+    });
+    const startTime = Date.now();
     const res = await fetch(DEEPSEEK_URL, {
         method: 'POST',
         headers: {
@@ -54,15 +61,32 @@ async function proxyGenerateTextDeepSeek(system: string, prompt: string): Promis
         }),
     });
 
-    if (!res.ok) throw new Error(`DeepSeek error ${res.status}: ${await res.text()}`);
+    if (!res.ok) {
+        const errText = await res.text();
+        span?.end({ output: errText, level: 'ERROR' });
+        throw new Error(`DeepSeek error ${res.status}: ${errText}`);
+    }
     const data = await res.json();
-    return data.choices?.[0]?.message?.content || '';
+    const output = data.choices?.[0]?.message?.content || '';
+    span?.end({
+        output,
+        usage: {
+            promptTokens: data.usage?.prompt_tokens,
+            completionTokens: data.usage?.completion_tokens,
+        },
+    });
+    return output;
 }
 
 /**
  * Raw fetch to Xiaochi proxy (OpenAI format)
  */
-async function proxyGenerateTextXiaochi(system: string, prompt: string): Promise<string> {
+async function proxyGenerateTextXiaochi(system: string, prompt: string, parentTrace?: any): Promise<string> {
+    const span = parentTrace?.generation({
+        name: 'xiaochi',
+        model: XIAOCHI_MODEL,
+        input: { system, prompt },
+    });
     const res = await fetch(XIAOCHI_URL, {
         method: 'POST',
         headers: {
@@ -79,15 +103,32 @@ async function proxyGenerateTextXiaochi(system: string, prompt: string): Promise
         }),
     });
 
-    if (!res.ok) throw new Error(`Xiaochi error ${res.status}: ${await res.text()}`);
+    if (!res.ok) {
+        const errText = await res.text();
+        span?.end({ output: errText, level: 'ERROR' });
+        throw new Error(`Xiaochi error ${res.status}: ${errText}`);
+    }
     const data = await res.json();
-    return data.choices?.[0]?.message?.content || '';
+    const output = data.choices?.[0]?.message?.content || '';
+    span?.end({
+        output,
+        usage: {
+            promptTokens: data.usage?.prompt_tokens,
+            completionTokens: data.usage?.completion_tokens,
+        },
+    });
+    return output;
 }
 
 /**
  * Raw fetch to VectorEngine proxy (Native Gemini REST format)
  */
-async function proxyGenerateTextVector(system: string, prompt: string): Promise<string> {
+async function proxyGenerateTextVector(system: string, prompt: string, parentTrace?: any): Promise<string> {
+    const span = parentTrace?.generation({
+        name: 'vectorengine',
+        model: VECTOR_TEXT_MODEL,
+        input: { system, prompt },
+    });
     const res = await fetch(VECTOR_TEXT_URL, {
         method: 'POST',
         headers: {
@@ -107,9 +148,15 @@ async function proxyGenerateTextVector(system: string, prompt: string): Promise<
         }),
     });
 
-    if (!res.ok) throw new Error(`Vector error ${res.status}: ${await res.text()}`);
+    if (!res.ok) {
+        const errText = await res.text();
+        span?.end({ output: errText, level: 'ERROR' });
+        throw new Error(`Vector error ${res.status}: ${errText}`);
+    }
     const data = await res.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const output = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    span?.end({ output });
+    return output;
 }
 
 /**
@@ -153,12 +200,12 @@ export async function proxyGenerateImage(prompt: string): Promise<string | null>
 /**
  * Fallback orchestrator: DeepSeek → VectorEngine → Xiaochi
  */
-async function generateTextProxyCascade(system: string, prompt: string): Promise<string> {
+async function generateTextProxyCascade(system: string, prompt: string, parentTrace?: any): Promise<string> {
     // 1. Try DeepSeek first (OpenAI-compatible)
     if (DEEPSEEK_KEY()) {
         try {
             console.warn('[AI Fallback] Trying DeepSeek...');
-            return await proxyGenerateTextDeepSeek(system, prompt);
+            return await proxyGenerateTextDeepSeek(system, prompt, parentTrace);
         } catch (e) {
             console.error('[AI Fallback] DeepSeek failed:', e);
         }
@@ -168,7 +215,7 @@ async function generateTextProxyCascade(system: string, prompt: string): Promise
     if (VECTOR_KEY()) {
         try {
             console.warn('[AI Fallback] Trying VectorEngine Proxy text model...');
-            return await proxyGenerateTextVector(system, prompt);
+            return await proxyGenerateTextVector(system, prompt, parentTrace);
         } catch (e) {
             console.error('[AI Fallback] VectorEngine failed:', e);
         }
@@ -177,7 +224,7 @@ async function generateTextProxyCascade(system: string, prompt: string): Promise
     // 3. Fallback to Xiaochi (OpenAI format)
     if (XIAOCHI_KEY()) {
         console.warn('[AI Fallback] Trying Xiaochi Proxy text model...');
-        return await proxyGenerateTextXiaochi(system, prompt);
+        return await proxyGenerateTextXiaochi(system, prompt, parentTrace);
     }
 
     throw new Error('All AI proxies failed or not configured');
@@ -192,14 +239,25 @@ export async function generateTextWithFallback(
     opts: Omit<Parameters<typeof generateText>[0], 'model'>
 ) {
     try {
-        return await generateText({ ...opts, model: googleModel(), maxRetries: 0 });
+        return await generateText({
+            ...opts,
+            model: googleModel(),
+            maxRetries: 0,
+        });
     } catch (err: any) {
         if (isQuotaError(err) || err.name === 'AI_RetryError') {
             console.warn('[AI] Google quota exceeded, initializing proxy cascade');
+            const trace = createTrace('generateText-fallback', {
+                system: String(opts.system || '').slice(0, 200),
+                prompt: String(opts.prompt || '').slice(0, 200),
+                reason: err.message,
+            });
             const text = await generateTextProxyCascade(
                 String(opts.system || ''),
                 String(opts.prompt || ''),
+                trace,
             );
+            trace?.end(text);
             return { text } as any;
         }
         throw err;
@@ -214,60 +272,105 @@ export async function streamTextWithFallback(
     opts: Omit<Parameters<typeof streamText>[0], 'model'>
 ) {
     try {
-        return await streamText({ ...opts, model: googleModel(), maxRetries: 0 });
+        const result = await streamText({
+            ...opts,
+            model: googleModel(),
+            maxRetries: 0,
+        });
+        
+        const response = result.toDataStreamResponse({
+            getErrorMessage: (err: any) => err?.message || String(err)
+        });
+
+        // Peek at the first chunk to catch asynchronous API quota errors hidden in the stream
+        const [peekStream, finalStream] = response.body!.tee();
+        const reader = peekStream.getReader();
+        const firstChunk = await reader.read();
+        
+        if (!firstChunk.done) {
+            const textChunk = new TextDecoder().decode(firstChunk.value);
+            if (textChunk.startsWith('3:') && textChunk.includes('quota')) {
+                reader.releaseLock();
+                throw new Error('Google Stream Quota Exceeded: ' + textChunk);
+            }
+        }
+        
+        // We do not await the rest of peekStream, but we do need to reconstruct the response
+        // so we don't consume the finalStream's chunk that we just peeked at.
+        reader.releaseLock();
+        
+        // Re-combine the chunk we read with the rest of the stream
+        const passthroughStream = new ReadableStream({
+            async start(controller) {
+                if (!firstChunk.done) {
+                    controller.enqueue(firstChunk.value);
+                }
+                const passthroughReader = finalStream.getReader();
+                while (true) {
+                    const { done, value } = await passthroughReader.read();
+                    if (done) break;
+                    controller.enqueue(value);
+                }
+                controller.close();
+            }
+        });
+
+        return {
+            ...result,
+            toDataStreamResponse: () => new Response(passthroughStream, { headers: response.headers })
+        } as any;
+        
     } catch (err: any) {
-        if (isQuotaError(err) || err.name === 'AI_RetryError') {
+        if (isQuotaError(err) || err.message?.includes('quota') || err.message?.includes('Quota')) {
             console.warn('[AI] Google quota exceeded, initializing proxy cascade (non-stream)');
+            const trace = createTrace('streamText-fallback', {
+                system: String(opts.system || '').slice(0, 200),
+                reason: err.message,
+            });
             const text = await generateTextProxyCascade(
                 String(opts.system || ''),
                 String(opts.prompt || (opts as any).messages?.filter((m: any) => m.role === 'user').pop()?.content || ''),
+                trace,
             );
-
-            // Build AI SDK Data Stream Protocol response
-            // Format: text delta lines as `0:"chunk"\n`, then finish events
-            const encoder = new TextEncoder();
-            const chunks: string[] = [];
-            // Split text into small chunks to simulate streaming
-            const chunkSize = 20;
-            for (let i = 0; i < text.length; i += chunkSize) {
-                const chunk = text.slice(i, i + chunkSize);
-                // Escape the chunk for JSON string
-                const escaped = JSON.stringify(chunk);
-                chunks.push(`0:${escaped}\n`);
-            }
-            // Finish reason event
-            chunks.push(`e:{"finishReason":"stop","usage":{"promptTokens":0,"completionTokens":0},"isContinued":false}\n`);
-            // Final data message
-            chunks.push(`d:{"finishReason":"stop","usage":{"promptTokens":0,"completionTokens":0}}\n`);
-
-            const stream = new ReadableStream({
-                async start(controller) {
-                    for (const chunk of chunks) {
-                        controller.enqueue(encoder.encode(chunk));
-                        // Small delay between chunks for visual streaming effect
-                        await new Promise(r => setTimeout(r, 15));
-                    }
-                    controller.close();
-                    // Invoke onFinish callback for conversation memory
-                    if ((opts as any).onFinish) {
-                        (opts as any).onFinish({
-                            text,
-                            finishReason: 'stop',
-                            usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
-                        });
-                    }
-                },
-            });
-
+            trace?.end(text);
             return {
-                textStream: stream,
+                textStream: new ReadableStream(), // Dummy interface
                 text: Promise.resolve(text),
-                toAIStreamResponse: () => new Response(stream, {
-                    headers: {
-                        'Content-Type': 'text/plain; charset=utf-8',
-                        'X-Vercel-AI-Data-Stream': 'v1',
-                    },
-                }),
+                toDataStreamResponse: () => {
+                    const encoder = new TextEncoder();
+                    const stream = new ReadableStream({
+                        async start(controller) {
+                            try {
+                                const chunkSize = 20;
+                                for (let i = 0; i < text.length; i += chunkSize) {
+                                    const chunk = text.slice(i, i + chunkSize);
+                                    controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`));
+                                    await new Promise(r => setTimeout(r, 15));
+                                }
+                                controller.close();
+
+                                if ((opts as any).onFinish) {
+                                    (opts as any).onFinish({
+                                        text,
+                                        finishReason: 'stop',
+                                        usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+                                    });
+                                }
+                            } catch (err) {
+                                console.error('[Fallback Stream Error]', err);
+                                controller.enqueue(encoder.encode(`3:"Stream error"\n`));
+                                controller.close();
+                            }
+                        }
+                    });
+
+                    return new Response(stream, {
+                        headers: {
+                            'Content-Type': 'text/plain; charset=utf-8',
+                            'X-Vercel-AI-Data-Stream': 'v1'
+                        }
+                    });
+                }
             } as any;
         }
         throw err;

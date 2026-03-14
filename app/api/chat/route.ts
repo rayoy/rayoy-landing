@@ -132,7 +132,7 @@ EXTENDED AI MEMORY (Do not explicitly mention you are reading this unless releva
 CURRENT DATE: ${currentDate}
 
 USER PROFILE:
-- Name: ${user.firstName || 'Unknown'}
+- Name: ${(user as any).firstName || 'Unknown'}
 - Birth Date: ${au.birth_date || 'Not provided'}
 - Birth Time: ${au.birth_time || 'Not provided'}
 - Birth Location: ${au.birth_location || 'Not provided'}
@@ -303,5 +303,11 @@ TOOLS:
         },
     });
 
-    return result.toAIStreamResponse();
+    return result.toDataStreamResponse({
+            getErrorMessage: (error: any) => {
+                const message = error?.message || String(error);
+                console.error('[AI Stream Internal Error]', error);
+                return `Server Stream Crash: ${message}`;
+            }
+        });
 }
