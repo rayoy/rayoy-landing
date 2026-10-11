@@ -8,7 +8,7 @@ export default function Logo() {
             viewBox="0 0 36 36"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            aria-label="Rayoy logo"
+            aria-label="Timing logo"
         >
             {/* Orbit ring */}
             <ellipse
@@ -30,7 +30,7 @@ export default function Logo() {
                 strokeWidth="1"
                 opacity="0.3"
             />
-            {/* R lettermark */}
+            {/* T lettermark */}
             <text
                 x="18"
                 y="22"
@@ -40,7 +40,7 @@ export default function Logo() {
                 fontWeight="600"
                 fontFamily="Inter, sans-serif"
             >
-                R
+                T
             </text>
             {/* Accent dot on orbit */}
             <circle cx="34" cy="18" r="2" fill="#2DD4BF" />

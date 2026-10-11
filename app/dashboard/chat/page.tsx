@@ -271,7 +271,7 @@ export default function AgentTerminal() {
                                         <Bot className="w-4 h-4 text-white" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="text-xs font-semibold text-gray-500 mb-2">RAYOY AI</div>
+                                        <div className="text-xs font-semibold text-gray-500 mb-2">TIMING AI</div>
 
                                         {/* Tool invocations */}
                                         {message.toolInvocations?.map((toolInvocation: any) => {
@@ -325,7 +325,7 @@ export default function AgentTerminal() {
                                     <Bot className="w-4 h-4 text-white" />
                                 </div>
                                 <div className="flex-1">
-                                    <div className="text-xs font-semibold text-gray-400 mb-1.5">RAYOY AI</div>
+                                    <div className="text-xs font-semibold text-gray-400 mb-1.5">TIMING AI</div>
                                     <div className="flex items-center gap-2 text-gray-500">
                                         <span className="text-sm animate-pulse">{t.thinking}</span>
                                         <div className="flex gap-1">

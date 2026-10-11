@@ -290,7 +290,7 @@ const GraphicReportDocument = ({
                 {/* HEADER */}
                 <View style={styles.header}>
                     <View style={styles.titleBox}>
-                        <Text style={styles.title}>RAYOY | {isZh ? '战略推演报告' : 'Strategic Timing Report'}</Text>
+                        <Text style={styles.title}>TIMING | {isZh ? '战略推演报告' : 'Strategic Timing Report'}</Text>
                         <Text style={styles.subtitle}>{isZh ? `为 ${userName} 定制的推演报告` : `Strategic Timing Report for ${userName}`}</Text>
                     </View>
                     <View style={{ alignItems: 'flex-end' }}>
@@ -554,7 +554,7 @@ const GraphicReportDocument = ({
 
                 {/* FOOTER */}
                 <View style={styles.footer}>
-                    <Text>{isZh ? 'Rayoy 精英战略顾问 | 系统版本 3.0' : 'Rayoy Elite Strategic Advisor | System Version 3.0'}</Text>
+                    <Text>{isZh ? 'Timing 精英战略顾问 | 系统版本 3.0' : 'Timing Elite Strategic Advisor | System Version 3.0'}</Text>
                     <Text style={{ marginTop: 3 }}>{isZh ? '本报告基于命理结构推演概率，行动由你掌控。' : 'This report maps structural probabilities. Execution is in your hands.'}</Text>
                     <Text style={{ marginTop: 3 }}>timing.rayoy.com</Text>
                 </View>
@@ -603,13 +603,13 @@ export async function POST(req: Request) {
             }
         });
 
-        const safeFilename = encodeURIComponent(`Rayoy_Report_${birthDate}.pdf`);
+        const safeFilename = encodeURIComponent(`Timing_Report_${birthDate}.pdf`);
 
         return new Response(webStream, {
             status: 200,
             headers: {
                 'Content-Type': 'application/pdf',
-                'Content-Disposition': `attachment; filename="Rayoy_Report_${birthDate}.pdf"; filename*=UTF-8''${safeFilename}`,
+                'Content-Disposition': `attachment; filename="Timing_Report_${birthDate}.pdf"; filename*=UTF-8''${safeFilename}`,
             },
         });
     } catch (e: any) {

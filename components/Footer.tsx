@@ -16,7 +16,7 @@ export default function Footer() {
                 <a href="mailto:support@rayoy.com" className="text-sm text-brand-muted hover:text-brand-accent transition-colors mb-4">
                     support@rayoy.com
                 </a>
-                <p className="text-sm text-brand-muted">© 2026 Rayoy. All rights reserved.</p>
+                <p className="text-sm text-brand-muted">Timing · © 2026 Rayoy. All rights reserved.</p>
             </div>
         </footer>
     );

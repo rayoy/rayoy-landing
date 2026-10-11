@@ -42,7 +42,7 @@ export default function DashboardClient({ firstName, plan, credits, hasBirthDate
                             <div className="w-10 h-10 rounded-[1rem] bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shadow-inner">
                                 <Sparkles className="w-5 h-5 text-indigo-400" />
                             </div>
-                            <h3 className="text-sm font-bold text-gray-400 tracking-wider">RAYOY MEMBERSHIP</h3>
+                            <h3 className="text-sm font-bold text-gray-400 tracking-wider">Timing {t.membership}</h3>
                         </div>
                         <h2 className="text-5xl font-black text-white capitalize tracking-tighter mb-2">{plan}</h2>
                         <p className="text-indigo-300 font-medium tracking-wide">

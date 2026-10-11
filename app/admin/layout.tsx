@@ -24,7 +24,7 @@ export default async function AdminLayout({
                 <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-6">
                         <Link href="/admin" className="text-lg font-bold text-white">
-                            Rayoy <span className="text-red-400 text-xs font-mono">ADMIN</span>
+                            Timing <span className="text-red-400 text-xs font-mono">ADMIN</span>
                         </Link>
                         <nav className="flex gap-4 text-sm">
                             <Link href="/admin" className="text-gray-400 hover:text-white transition-colors">Users</Link>

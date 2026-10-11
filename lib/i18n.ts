@@ -70,7 +70,7 @@ export const translations: Record<Locale, Translations> = {
         hero: {
             headline: 'Strategy Is Timing.',
             subheadline:
-                'Rayoy analyzes your personal and business cycle to help you decide when to expand, pause, or pivot.',
+                'Timing analyzes your personal and business cycle to help you decide when to expand, pause, or pivot.',
             ctaPrimary: 'Get Your 3-Year Cycle Report',
             ctaSecondary: 'Learn the Method',
         },
@@ -121,11 +121,11 @@ export const translations: Record<Locale, Translations> = {
             items: [
                 {
                     q: 'Is this fortune telling?',
-                    a: 'No. Rayoy is a structured analytical framework based on cycle models. It does not predict the future — it identifies patterns in timing to support better decision-making.',
+                    a: 'No. Timing is a structured analytical framework based on cycle models. It does not predict the future — it identifies patterns in timing to support better decision-making.',
                 },
                 {
                     q: 'How accurate is it?',
-                    a: 'Rayoy provides probabilistic analysis based on historical cycle patterns. It is a decision-support tool, not a guarantee of outcomes. Accuracy depends on the quality of input data and the context of application.',
+                    a: 'Timing provides probabilistic analysis based on historical cycle patterns. It is a decision-support tool, not a guarantee of outcomes. Accuracy depends on the quality of input data and the context of application.',
                 },
                 {
                     q: 'Who is it for?',
@@ -133,7 +133,7 @@ export const translations: Record<Locale, Translations> = {
                 },
                 {
                     q: 'Is this financial advice?',
-                    a: 'No. Rayoy is not a financial advisory service. It is a strategic analysis tool. All decisions remain your responsibility. Consult qualified professionals for financial, legal, or medical advice.',
+                    a: 'No. Timing is not a financial advisory service. It is a strategic analysis tool. All decisions remain your responsibility. Consult qualified professionals for financial, legal, or medical advice.',
                 },
             ],
         },
@@ -152,7 +152,7 @@ export const translations: Record<Locale, Translations> = {
         hero: {
             headline: '决策，先看节奏。',
             subheadline:
-                'Rayoy 通过周期模型分析你的阶段位置与三年趋势，帮助你判断扩张、收缩或转向的时机。',
+                'Timing 通过周期模型分析你的阶段位置与三年趋势，帮助你判断扩张、收缩或转向的时机。',
             ctaPrimary: '获取三年周期分析',
             ctaSecondary: '了解方法论',
         },
@@ -203,11 +203,11 @@ export const translations: Record<Locale, Translations> = {
             items: [
                 {
                     q: '这是算命吗？',
-                    a: 'Rayoy 不是算命工具。它是一个基于周期模型的结构化分析框架，不预测未来，而是识别时机规律以辅助决策。',
+                    a: 'Timing 不是算命工具。它是一个基于周期模型的结构化分析框架，不预测未来，而是识别时机规律以辅助决策。',
                 },
                 {
                     q: '准确度如何？',
-                    a: 'Rayoy 基于历史周期模式提供概率性分析，是决策辅助工具，不保证结果。准确性取决于输入数据质量和应用场景。',
+                    a: 'Timing 基于历史周期模式提供概率性分析，是决策辅助工具，不保证结果。准确性取决于输入数据质量和应用场景。',
                 },
                 {
                     q: '适合谁使用？',
@@ -215,7 +215,7 @@ export const translations: Record<Locale, Translations> = {
                 },
                 {
                     q: '这是投资建议吗？',
-                    a: 'Rayoy 不是财务咨询服务，而是战略分析工具。所有决策由你自己负责。如需财务、法律或医疗建议，请咨询专业人士。',
+                    a: 'Timing 不是财务咨询服务，而是战略分析工具。所有决策由你自己负责。如需财务、法律或医疗建议，请咨询专业人士。',
                 },
             ],
         },
@@ -234,7 +234,7 @@ export const translations: Record<Locale, Translations> = {
         hero: {
             headline: '決策，先看節奏。',
             subheadline:
-                'Rayoy 透過週期模型分析你的階段位置與三年趨勢，幫助你判斷擴張、收縮或轉向的時機。',
+                'Timing 透過週期模型分析你的階段位置與三年趨勢，幫助你判斷擴張、收縮或轉向的時機。',
             ctaPrimary: '取得三年週期分析',
             ctaSecondary: '了解方法論',
         },
@@ -285,11 +285,11 @@ export const translations: Record<Locale, Translations> = {
             items: [
                 {
                     q: '這是算命嗎？',
-                    a: 'Rayoy 不是算命工具。它是一個基於週期模型的結構化分析框架，不預測未來，而是識別時機規律以輔助決策。',
+                    a: 'Timing 不是算命工具。它是一個基於週期模型的結構化分析框架，不預測未來，而是識別時機規律以輔助決策。',
                 },
                 {
                     q: '準確度如何？',
-                    a: 'Rayoy 基於歷史週期模式提供概率性分析，是決策輔助工具，不保證結果。準確性取決於輸入數據品質和應用場景。',
+                    a: 'Timing 基於歷史週期模式提供概率性分析，是決策輔助工具，不保證結果。準確性取決於輸入數據品質和應用場景。',
                 },
                 {
                     q: '適合誰使用？',
@@ -297,7 +297,7 @@ export const translations: Record<Locale, Translations> = {
                 },
                 {
                     q: '這是投資建議嗎？',
-                    a: 'Rayoy 不是財務諮詢服務，而是戰略分析工具。所有決策由你自己負責。如需財務、法律或醫療建議，請諮詢專業人士。',
+                    a: 'Timing 不是財務諮詢服務，而是戰略分析工具。所有決策由你自己負責。如需財務、法律或醫療建議，請諮詢專業人士。',
                 },
             ],
         },
