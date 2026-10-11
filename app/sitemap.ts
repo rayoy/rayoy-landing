@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://www.rayoy.com';
+    const baseUrl = 'https://timing.rayoy.com';
 
     return [
         { url: baseUrl, lastModified: new Date(), changeFrequency: 'weekly', priority: 1 },

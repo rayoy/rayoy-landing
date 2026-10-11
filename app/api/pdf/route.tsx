@@ -460,7 +460,7 @@ const GraphicReportDocument = ({
                                     </View>
                                     <View style={{ backgroundColor: '#F59E0B', borderRadius: 8, padding: 12, alignItems: 'center' }}>
                                         <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#FFFFFF' }}>
-                                            {isZh ? '立即解锁 → rayoy.com/try' : 'Unlock Now → rayoy.com/try'}
+                                            {isZh ? '立即解锁 → timing.rayoy.com/try' : 'Unlock Now → timing.rayoy.com/try'}
                                         </Text>
                                     </View>
                                     <Text style={{ fontSize: 9, color: '#A16207', textAlign: 'center', marginTop: 8 }}>
@@ -556,7 +556,7 @@ const GraphicReportDocument = ({
                 <View style={styles.footer}>
                     <Text>{isZh ? 'Rayoy 精英战略顾问 | 系统版本 3.0' : 'Rayoy Elite Strategic Advisor | System Version 3.0'}</Text>
                     <Text style={{ marginTop: 3 }}>{isZh ? '本报告基于命理结构推演概率，行动由你掌控。' : 'This report maps structural probabilities. Execution is in your hands.'}</Text>
-                    <Text style={{ marginTop: 3 }}>rayoy.com</Text>
+                    <Text style={{ marginTop: 3 }}>timing.rayoy.com</Text>
                 </View>
             </Page>
         </Document>

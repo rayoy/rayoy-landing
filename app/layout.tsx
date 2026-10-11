@@ -12,11 +12,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Rayoy — AI Cycle Intelligence System',
     description: 'Know exactly when to expand, pause, or pivot. AI-powered strategic timing based on your personal cycle.',
-    url: 'https://www.rayoy.com',
+    url: 'https://timing.rayoy.com',
     siteName: 'Rayoy',
     type: 'website',
     locale: 'en_US',
-    images: [{ url: 'https://www.rayoy.com/og-image.png', width: 1200, height: 630, alt: 'Rayoy AI Cycle Intelligence' }],
+    images: [{ url: 'https://timing.rayoy.com/og-image.png', width: 1200, height: 630, alt: 'Rayoy AI Cycle Intelligence' }],
   },
   twitter: {
     card: 'summary_large_image',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     description: 'AI-powered strategic timing. Know when to expand, pause, or pivot.',
   },
   robots: { index: true, follow: true },
-  metadataBase: new URL('https://www.rayoy.com'),
+  metadataBase: new URL('https://timing.rayoy.com'),
 };
 
 export default function RootLayout({

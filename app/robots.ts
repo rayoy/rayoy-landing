@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
                 disallow: ['/api/', '/dashboard/', '/admin/', '/sign-in', '/sign-up'],
             },
         ],
-        sitemap: 'https://www.rayoy.com/sitemap.xml',
+        sitemap: 'https://timing.rayoy.com/sitemap.xml',
     };
 }
