@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import Logo from '@/components/Logo';
 import { useLanguage } from '@/lib/LanguageContext';
 import type { Locale } from '@/lib/i18n';
 import { legalTranslations } from '@/lib/legal-i18n';

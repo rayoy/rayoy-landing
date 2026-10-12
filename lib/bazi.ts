@@ -296,8 +296,8 @@ export function calculateBaziChart(birthDate: string, birthTime?: string): BaziC
     const dominantEl = entries[0][0];
     const weakestEl = entries[entries.length - 1][0];
 
-    const elIdx = FIVE_ELEMENTS.indexOf(dominantEl as any);
-    const weakIdx = FIVE_ELEMENTS.indexOf(weakestEl as any);
+    const elIdx = FIVE_ELEMENTS.findIndex(element => element === dominantEl);
+    const weakIdx = FIVE_ELEMENTS.findIndex(element => element === weakestEl);
 
     // Current year transit
     const now = new Date();

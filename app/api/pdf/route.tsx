@@ -1,4 +1,6 @@
-import { NextResponse } from 'next/server';
+import type { FusionChart } from '@/lib/fusion';
+import type { FreeReport, LockedReport } from '@/lib/report-types';
+import { getErrorMessage } from '@/lib/errors';
 import { renderToStream } from '@react-pdf/renderer';
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
@@ -276,11 +278,11 @@ const GraphicReportDocument = ({
     freeReport,
     lockedReport,
 }: {
-    chartData: any;
+    chartData: FusionChart;
     userName: string;
     locale: string;
-    freeReport?: any;
-    lockedReport?: any;
+    freeReport?: FreeReport;
+    lockedReport?: LockedReport;
 }) => {
     const isZh = locale?.startsWith('zh');
 
@@ -354,7 +356,7 @@ const GraphicReportDocument = ({
                             <View style={{ backgroundColor: '#F8FAFC', padding: 12, borderRadius: 10, marginBottom: 10 }}>
                                 <Text style={{ fontSize: 10, color: '#64748B', marginBottom: 4 }}>{isZh ? '命宫主星' : 'Core Palace Stars'}</Text>
                                 <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#0F172A' }}>
-                                    {isZh ? chartData.ziwei.lifePalace.majorStars.map((s: any) => s.name).join('、') || '无主星' : chartData.ziwei.lifePalace.majorStars.map((s: any) => s.nameEn).join(', ') || 'Empty'}
+                                    {isZh ? chartData.ziwei.lifePalace.majorStars.map((s) => s.name).join('、') || '无主星' : chartData.ziwei.lifePalace.majorStars.map((s) => s.nameEn).join(', ') || 'Empty'}
                                 </Text>
                             </View>
                             <View style={{ backgroundColor: '#F5F3FF', padding: 12, borderRadius: 10 }}>
@@ -492,7 +494,7 @@ const GraphicReportDocument = ({
                             </View>
 
                             {/* Actions */}
-                            {lockedReport.actions?.items?.map((item: any, i: number) => (
+                            {lockedReport.actions?.items?.map((item, i) => (
                                 <SectionCard
                                     key={`action-${i}`}
                                     title={item.label}
@@ -505,14 +507,14 @@ const GraphicReportDocument = ({
                             ))}
 
                             {/* Timing Windows */}
-                            {lockedReport.timing?.windows?.length > 0 && (
+                            {lockedReport.timing && lockedReport.timing.windows.length > 0 && (
                                 <View style={styles.sectionCard} wrap={false}>
                                     <View style={styles.sectionHeader}>
                                         <Text style={styles.cardTitle}>{lockedReport.timing.title || (isZh ? '最佳时机窗口' : 'Timing Windows')}</Text>
                                         <Text style={{ ...styles.sectionBadge, backgroundColor: '#ECFDF5', color: '#059669' }}>Timing</Text>
                                     </View>
                                     <View style={styles.sectionBody}>
-                                        {lockedReport.timing.windows.map((w: any, i: number) => (
+                                        {lockedReport.timing.windows.map((w, i) => (
                                             <View key={i} style={{ flexDirection: 'row', marginBottom: 8, paddingLeft: 4 }}>
                                                 <Text style={{ fontSize: 11, color: '#059669', marginRight: 6 }}>▸</Text>
                                                 <View style={{ flex: 1 }}>
@@ -568,7 +570,7 @@ const GraphicReportDocument = ({
 export async function POST(req: Request) {
     try {
         // Support both JSON and form data (form data for native browser download)
-        let body: any;
+        let body: { birthDate?: string; birthTime?: string; userName?: string; locale?: string; freeReport?: FreeReport; lockedReport?: LockedReport };
         const contentType = req.headers.get('content-type') || '';
         if (contentType.includes('application/json')) {
             body = await req.json();
@@ -612,8 +614,8 @@ export async function POST(req: Request) {
                 'Content-Disposition': `attachment; filename="Timing_Report_${birthDate}.pdf"; filename*=UTF-8''${safeFilename}`,
             },
         });
-    } catch (e: any) {
+    } catch (e) {
         console.error('PDF Generation Error:', e);
-        return new Response(`Failed to generate PDF: ${e.message}`, { status: 500 });
+        return new Response(`Failed to generate PDF: ${getErrorMessage(e)}`, { status: 500 });
     }
 }

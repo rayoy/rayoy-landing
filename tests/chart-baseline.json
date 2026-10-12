@@ -1,0 +1,34 @@
+[
+  {
+    "input": [
+      "1990-05-15",
+      "09:00",
+      "M"
+    ],
+    "sha256": "96997c623d0c22389180a05f3e12ed3ca017017b97c73e29a0890ba085b0f888"
+  },
+  {
+    "input": [
+      "2000-02-04",
+      "00:00",
+      "F"
+    ],
+    "sha256": "daada59ebdc949fd32f7bb9e8f72bffe3c619e0db1b102e1de5ecc41f36de5dd"
+  },
+  {
+    "input": [
+      "1988-12-31",
+      "23:00",
+      "M"
+    ],
+    "sha256": "caae889eb20b6298a03ba9c6cdc431cd2af22cfe05ea2ca59d18b7a231e8b921"
+  },
+  {
+    "input": [
+      "1995-08-20",
+      null,
+      "F"
+    ],
+    "sha256": "efce7b5610e43801de66d7ee9510cbb9bb2a2c9d948378ccc715519e82d4e77a"
+  }
+]

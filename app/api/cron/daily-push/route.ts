@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/errors';
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { generateTextWithFallback } from '@/lib/ai-provider';
@@ -89,8 +90,8 @@ Task: Generate today's specific push notification text.`;
             generated: generatedNotifications.length
         });
 
-    } catch (e: any) {
+    } catch (e) {
         console.error('Cron Error:', e);
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: getErrorMessage(e) }, { status: 500 });
     }
 }

@@ -132,7 +132,7 @@ function uuid(): string {
 /**
  * Fire-and-forget: send a batch of events to LangFuse ingestion API.
  */
-function ingestBatch(events: any[]) {
+function ingestBatch(events: Array<{ type: string; id: string; timestamp: string; body: Record<string, unknown> }>) {
     const auth = langfuseAuthHeader();
     if (!auth) return;
 
@@ -149,23 +149,23 @@ export interface LfTrace {
     generation(opts: {
         name: string;
         model: string;
-        input?: any;
+        input?: unknown;
     }): LfGeneration;
     /** End the trace with output */
-    end(output?: any): void;
+    end(output?: unknown): void;
 }
 
 export interface LfGeneration {
     generationId: string;
     /** End the generation with output + optional usage */
-    end(opts?: { output?: any; usage?: { promptTokens?: number; completionTokens?: number }; level?: string }): void;
+    end(opts?: { output?: unknown; usage?: { promptTokens?: number; completionTokens?: number }; level?: string }): void;
 }
 
 /**
  * Create a LangFuse trace. Returns a lightweight handle.
  * If LangFuse is not configured, returns null.
  */
-export function createTrace(name: string, input?: any): LfTrace | null {
+export function createTrace(name: string, input?: unknown): LfTrace | null {
     if (!langfuseAuthHeader()) return null;
 
     const traceId = uuid();

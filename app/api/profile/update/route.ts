@@ -33,8 +33,8 @@ export async function POST(req: Request) {
                 .from('user_profiles_extended')
                 .upsert({
                     user_id: user.id,
-                    bazi_chart: chart.bazi as any,
-                    ziwei_chart: chart.ziwei as any,
+                    bazi_chart: chart.bazi,
+                    ziwei_chart: chart.ziwei,
                     fusion_context: chart.fusionContext,
                 }, { onConflict: 'user_id' });
 

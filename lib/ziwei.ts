@@ -150,7 +150,7 @@ export function calculateZiweiChart(
 
         // Locate transformation stars in this palace
         const transformations: Palace['transformations'] = {};
-        const checkTrans = (starList: any[]) => {
+        const checkTrans = (starList: typeof p.majorStars) => {
             starList.forEach(s => {
                 if (s.mutagen) {
                     const transStar: Star = { name: s.name, nameEn: STAR_EN[s.name] || s.name, type: 'transformation' };

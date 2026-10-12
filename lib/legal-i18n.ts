@@ -7,17 +7,17 @@ export interface LegalTranslations {
     terms: {
         title: string;
         lastUpdated: string;
-        content: React.ReactNode;
+        content: string;
     };
     privacy: {
         title: string;
         lastUpdated: string;
-        content: React.ReactNode;
+        content: string;
     };
     disclaimer: {
         title: string;
         lastUpdated: string;
-        content: React.ReactNode;
+        content: string;
     };
     contact: {
         title: string;
@@ -26,7 +26,7 @@ export interface LegalTranslations {
     };
 }
 
-export const legalTranslations: Record<Locale, any> = {
+export const legalTranslations: Record<Locale, LegalTranslations> = {
     en: {
         nav: {
             back: 'Back to Home',

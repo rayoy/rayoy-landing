@@ -274,9 +274,9 @@ export default function AgentTerminal() {
                                         <div className="text-xs font-semibold text-gray-500 mb-2">TIMING AI</div>
 
                                         {/* Tool invocations */}
-                                        {message.toolInvocations?.map((toolInvocation: any) => {
+                                        {message.toolInvocations?.map((toolInvocation) => {
                                             const toolCallId = toolInvocation.toolCallId;
-                                            const isResult = 'result' in toolInvocation || toolInvocation.state === 'result';
+                                            const isResult = toolInvocation.state === 'result' || 'result' in toolInvocation;
                                             return (
                                                 <div key={toolCallId} className="text-[11px] font-mono mb-2 py-1 px-2.5 bg-gray-800/50 rounded-md border border-gray-700/50 inline-flex items-center gap-1.5 mr-2">
                                                     {!isResult && <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse" />}

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import type { BaziChart } from '@/lib/bazi';
 import { Sparkles, TrendingUp, Bell } from 'lucide-react';
 import DailyPulse from '@/components/DailyPulse';
 import { useLanguage } from '@/lib/LanguageContext';
@@ -10,13 +11,14 @@ interface DashboardClientProps {
     plan: string;
     credits: number;
     hasBirthDate: boolean;
-    extendedProfile: any;
-    notifications: any[];
+    extendedProfile: { bazi_chart?: BaziChart | null } | null;
+    notifications: Array<{ id: string; title: string; insight_type: string; message: string; created_at: string | null }>;
 }
 
 export default function DashboardClient({ firstName, plan, credits, hasBirthDate, extendedProfile, notifications }: DashboardClientProps) {
     const { ta } = useLanguage();
     const t = ta.dashboard;
+    const baziChart = extendedProfile?.bazi_chart;
 
     return (
         <div className="space-y-10 fade-in px-4 py-6 md:px-0 relative">
@@ -83,15 +85,15 @@ export default function DashboardClient({ firstName, plan, credits, hasBirthDate
                         <span className="text-[10px] uppercase font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20">BAZI</span>
                     </div>
 
-                    {extendedProfile?.bazi_chart ? (
+                    {baziChart ? (
                         <div className="space-y-6">
                             <div className="flex justify-between items-center text-center">
                                 {['YEAR', 'MONTH', 'DAY', 'HOUR'].map((pillar, i) => {
                                     const p = [
-                                        extendedProfile.bazi_chart.yearPillar,
-                                        extendedProfile.bazi_chart.monthPillar,
-                                        extendedProfile.bazi_chart.dayPillar,
-                                        extendedProfile.bazi_chart.hourPillar
+                                        baziChart.yearPillar,
+                                        baziChart.monthPillar,
+                                        baziChart.dayPillar,
+                                        baziChart.hourPillar
                                     ][i];
 
                                     return (
@@ -112,11 +114,11 @@ export default function DashboardClient({ firstName, plan, credits, hasBirthDate
                             <div className="pt-6 border-t border-gray-800/50 flex justify-between items-center">
                                 <div className="text-sm">
                                     <span className="text-gray-500">Core Element: </span>
-                                    <span className="text-white font-bold">{extendedProfile.bazi_chart.dayMaster?.elementEn}</span>
+                                    <span className="text-white font-bold">{baziChart.dayMaster?.elementEn}</span>
                                 </div>
                                 <div className="text-sm">
                                     <span className="text-gray-500">Strongest: </span>
-                                    <span className="text-amber-400 font-bold">↑ {extendedProfile.bazi_chart.dominantElement?.en}</span>
+                                    <span className="text-amber-400 font-bold">↑ {baziChart.dominantElement?.en}</span>
                                 </div>
                             </div>
                         </div>

@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../lib/errors';
 /**
  * Seed LangFuse Prompts
  *
@@ -141,8 +142,8 @@ async function main() {
                 labels: p.labels,
             });
             console.log(`  ✅ ${p.name} — created & labeled "production"`);
-        } catch (err: any) {
-            console.error(`  ❌ ${p.name} — ${err.message}`);
+        } catch (err) {
+            console.error(`  ❌ ${p.name} — ${getErrorMessage(err)}`);
         }
     }
 

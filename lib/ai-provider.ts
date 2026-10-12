@@ -1,10 +1,16 @@
 import { google } from '@ai-sdk/google';
-import { generateText, streamText, createDataStreamResponse, type DataStreamWriter } from 'ai';
+import { generateText, streamText } from 'ai';
+import { asRecord, getErrorMessage } from '@/lib/errors';
 import { createTrace, type LfTrace } from '@/lib/langfuse';
 
+// Both the SDK and proxy fallback provide this completion data to callers.
+type StreamFinish = Pick<Parameters<NonNullable<Parameters<typeof streamText>[0]['onFinish']>>[0], 'text' | 'finishReason' | 'usage'>;
+type FallbackStreamOptions = Omit<Parameters<typeof streamText>[0], 'model' | 'onFinish'> & {
+    onFinish?: (event: StreamFinish) => void | Promise<void>;
+};
+
 // Text Models
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const googleModel = () => google('models/gemini-2.0-flash') as any;
+const googleModel = () => google('models/gemini-2.0-flash');
 const DEEPSEEK_MODEL = 'deepseek-chat';
 const XIAOCHI_MODEL = 'gemini-3-flash';
 const VECTOR_TEXT_MODEL = 'gemini-3-flash-preview';
@@ -21,9 +27,10 @@ const VECTOR_TEXT_URL = `https://api.vectorengine.ai/v1beta/models/${VECTOR_TEXT
 const VECTOR_IMAGE_URL = `https://api.vectorengine.ai/v1beta/models/${VECTOR_IMAGE_MODEL}:generateContent`;
 const VECTOR_KEY = () => process.env.VECTOR_PROXY_API_KEY || '';
 
-function isQuotaError(err: any): boolean {
-    const msg = String(err?.message || err?.lastError?.message || '');
-    const status = err?.statusCode || err?.data?.error?.code;
+export function isQuotaError(err: unknown): boolean {
+    const error = asRecord(err);
+    const msg = String(error?.message || asRecord(error?.lastError)?.message || '');
+    const status = error?.statusCode || asRecord(asRecord(error?.data)?.error)?.code;
     return (
         status === 429 ||
         status === 403 ||
@@ -31,20 +38,19 @@ function isQuotaError(err: any): boolean {
         msg.includes('RESOURCE_EXHAUSTED') ||
         msg.includes('maxRetriesExceeded') ||
         msg.includes('ECONNRESET') ||
-        err?.name === 'AI_APICallError'
+        error?.name === 'AI_APICallError'
     );
 }
 
 /**
  * Raw fetch to DeepSeek (OpenAI-compatible format)
  */
-async function proxyGenerateTextDeepSeek(system: string, prompt: string, parentTrace?: any): Promise<string> {
+async function proxyGenerateTextDeepSeek(system: string, prompt: string, parentTrace?: LfTrace | null): Promise<string> {
     const span = parentTrace?.generation({
         name: 'deepseek',
         model: DEEPSEEK_MODEL,
         input: { system, prompt },
     });
-    const startTime = Date.now();
     const res = await fetch(DEEPSEEK_URL, {
         method: 'POST',
         headers: {
@@ -81,7 +87,7 @@ async function proxyGenerateTextDeepSeek(system: string, prompt: string, parentT
 /**
  * Raw fetch to Xiaochi proxy (OpenAI format)
  */
-async function proxyGenerateTextXiaochi(system: string, prompt: string, parentTrace?: any): Promise<string> {
+async function proxyGenerateTextXiaochi(system: string, prompt: string, parentTrace?: LfTrace | null): Promise<string> {
     const span = parentTrace?.generation({
         name: 'xiaochi',
         model: XIAOCHI_MODEL,
@@ -123,7 +129,7 @@ async function proxyGenerateTextXiaochi(system: string, prompt: string, parentTr
 /**
  * Raw fetch to VectorEngine proxy (Native Gemini REST format)
  */
-async function proxyGenerateTextVector(system: string, prompt: string, parentTrace?: any): Promise<string> {
+async function proxyGenerateTextVector(system: string, prompt: string, parentTrace?: LfTrace | null): Promise<string> {
     const span = parentTrace?.generation({
         name: 'vectorengine',
         model: VECTOR_TEXT_MODEL,
@@ -184,9 +190,9 @@ export async function proxyGenerateImage(prompt: string): Promise<string | null>
         }
 
         const data = await res.json();
-        const parts = data.candidates?.[0]?.content?.parts || [];
+        const parts: Array<{ inlineData?: { mimeType: string; data: string } }> = data.candidates?.[0]?.content?.parts || [];
         // Gemini image models return inlineData with mimeType 'image/png' or 'image/jpeg'
-        const imagePart = parts.find((p: any) => p.inlineData?.mimeType?.startsWith('image/'));
+        const imagePart = parts.find((p) => p.inlineData?.mimeType?.startsWith('image/'));
         if (imagePart?.inlineData) {
             return `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
         }
@@ -200,7 +206,7 @@ export async function proxyGenerateImage(prompt: string): Promise<string | null>
 /**
  * Fallback orchestrator: DeepSeek → VectorEngine → Xiaochi
  */
-async function generateTextProxyCascade(system: string, prompt: string, parentTrace?: any): Promise<string> {
+async function generateTextProxyCascade(system: string, prompt: string, parentTrace?: LfTrace | null): Promise<string> {
     // 1. Try DeepSeek first (OpenAI-compatible)
     if (DEEPSEEK_KEY()) {
         try {
@@ -244,13 +250,13 @@ export async function generateTextWithFallback(
             model: googleModel(),
             maxRetries: 0,
         });
-    } catch (err: any) {
-        if (isQuotaError(err) || err.name === 'AI_RetryError') {
+    } catch (err) {
+        if (isQuotaError(err) || asRecord(err)?.name === 'AI_RetryError') {
             console.warn('[AI] Google quota exceeded, initializing proxy cascade');
             const trace = createTrace('generateText-fallback', {
                 system: String(opts.system || '').slice(0, 200),
                 prompt: String(opts.prompt || '').slice(0, 200),
-                reason: err.message,
+                reason: getErrorMessage(err),
             });
             const text = await generateTextProxyCascade(
                 String(opts.system || ''),
@@ -258,7 +264,7 @@ export async function generateTextWithFallback(
                 trace,
             );
             trace?.end(text);
-            return { text } as any;
+            return { text };
         }
         throw err;
     }
@@ -269,8 +275,8 @@ export async function generateTextWithFallback(
  * Note: proxy fallback for stream is non-streaming (returns full text)
  */
 export async function streamTextWithFallback(
-    opts: Omit<Parameters<typeof streamText>[0], 'model'>
-) {
+    opts: FallbackStreamOptions
+): Promise<Pick<ReturnType<typeof streamText>, 'toDataStreamResponse'>> {
     try {
         const result = await streamText({
             ...opts,
@@ -279,7 +285,7 @@ export async function streamTextWithFallback(
         });
         
         const response = result.toDataStreamResponse({
-            getErrorMessage: (err: any) => err?.message || String(err)
+            getErrorMessage: (err: unknown) => getErrorMessage(err)
         });
 
         // Peek at the first chunk to catch asynchronous API quota errors hidden in the stream
@@ -315,25 +321,26 @@ export async function streamTextWithFallback(
             }
         });
 
-        return {
+        const streamed = {
             ...result,
             toDataStreamResponse: () => new Response(passthroughStream, { headers: response.headers })
-        } as any;
+        };
+        return streamed;
         
-    } catch (err: any) {
-        if (isQuotaError(err) || err.message?.includes('quota') || err.message?.includes('Quota')) {
+    } catch (err) {
+        if (isQuotaError(err) || getErrorMessage(err).includes('quota') || getErrorMessage(err).includes('Quota')) {
             console.warn('[AI] Google quota exceeded, initializing proxy cascade (non-stream)');
             const trace = createTrace('streamText-fallback', {
                 system: String(opts.system || '').slice(0, 200),
-                reason: err.message,
+                reason: getErrorMessage(err),
             });
             const text = await generateTextProxyCascade(
                 String(opts.system || ''),
-                String(opts.prompt || (opts as any).messages?.filter((m: any) => m.role === 'user').pop()?.content || ''),
+                String(opts.prompt || opts.messages?.filter((m) => m.role === 'user').pop()?.content || ''),
                 trace,
             );
             trace?.end(text);
-            return {
+            const fallback = {
                 textStream: new ReadableStream(), // Dummy interface
                 text: Promise.resolve(text),
                 toDataStreamResponse: () => {
@@ -349,8 +356,8 @@ export async function streamTextWithFallback(
                                 }
                                 controller.close();
 
-                                if ((opts as any).onFinish) {
-                                    (opts as any).onFinish({
+                                if (opts.onFinish) {
+                                    opts.onFinish({
                                         text,
                                         finishReason: 'stop',
                                         usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
@@ -371,7 +378,8 @@ export async function streamTextWithFallback(
                         }
                     });
                 }
-            } as any;
+            };
+            return fallback;
         }
         throw err;
     }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ArrowRight,
@@ -30,45 +30,11 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/lib/LanguageContext';
 
+import type { FusionChart } from '@/lib/fusion';
+import type { FreeReport, LockedReport } from '@/lib/report-types';
+import { getErrorMessage } from '@/lib/errors';
+
 // ─── Types ──────────────────────────────────────────────────────────────
-
-interface ReportSection {
-    title: string;
-    professional: string;
-    plain: string;
-}
-
-interface FreeReport {
-    identity: ReportSection;
-    currentCycle: ReportSection;
-    riskAssessment: {
-        level: 'low' | 'medium' | 'high';
-        title: string;
-        professional: string;
-        plain: string;
-    };
-}
-
-interface LockedReport {
-    actions?: {
-        title: string;
-        items: Array<{
-            label: string;
-            professional: string;
-            plain: string;
-        }>;
-    };
-    timing?: {
-        title: string;
-        windows: Array<{
-            period: string;
-            focus: string;
-            detail: string;
-        }>;
-    };
-    elementStrategy?: ReportSection;
-    decisionAnalysis?: ReportSection;
-}
 
 interface TrialResult {
     freeReport: FreeReport | null;
@@ -80,7 +46,7 @@ interface TrialResult {
         dominantElement: { zh: string; en: string };
         weakestElement: { zh: string; en: string };
     };
-    chartData?: any;
+    chartData?: FusionChart;
     imageUrl?: string | null;
 }
 
@@ -102,7 +68,7 @@ function DualLayerCard({
     professional: string;
     plain: string;
     accentColor?: 'indigo' | 'amber' | 'emerald' | 'red' | 'violet';
-    badge?: string;
+    badge?: React.ReactNode;
     delay?: number;
 }) {
     const [expanded, setExpanded] = useState(false);
@@ -412,9 +378,9 @@ export default function TryPage() {
             const data = await res.json();
             setLoadingStage(ANALYSIS_STEPS.length); // all done
             setResult(data);
-        } catch (err: any) {
+        } catch (err) {
             console.error('Trial failed', err);
-            setError(err.message || 'Analysis failed');
+            setError(getErrorMessage(err) || 'Analysis failed');
         } finally {
             stageTimersRef.current.forEach(t => clearTimeout(t));
             stageTimersRef.current = [];
@@ -479,9 +445,9 @@ export default function TryPage() {
             // Hide the spinner after a safe delay, since form.submit() doesn't return a promise
             setTimeout(() => setDownloadingPdf(false), 3000);
 
-        } catch (error: any) {
+        } catch (error) {
             console.error('PDF download failed:', error);
-            alert(isZh ? `PDF 生成失败：${error.message}` : `Failed to generate PDF: ${error.message}`);
+            alert(isZh ? `PDF 生成失败：${getErrorMessage(error)}` : `Failed to generate PDF: ${getErrorMessage(error)}`);
             setDownloadingPdf(false);
         }
     };
@@ -723,7 +689,7 @@ export default function TryPage() {
                                             professional={report.riskAssessment.professional}
                                             plain={report.riskAssessment.plain}
                                             accentColor="amber"
-                                            badge={<RiskBadge level={report.riskAssessment.level} isZh={isZh} /> as any}
+                                            badge={<RiskBadge level={report.riskAssessment.level} isZh={isZh} />}
                                             delay={0.3}
                                         />
                                     </div>

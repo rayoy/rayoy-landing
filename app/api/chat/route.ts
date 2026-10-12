@@ -1,5 +1,6 @@
 import { streamTextWithFallback } from '@/lib/ai-provider';
-import { tool } from 'ai';
+import { tool, type Message } from 'ai';
+import { getErrorMessage } from '@/lib/errors';
 import { z } from 'zod';
 import { currentUser } from '@clerk/nextjs/server';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -94,7 +95,7 @@ export async function POST(req: Request) {
             .eq('id', user.id);
     }
 
-    const body = await req.json();
+    const body: { messages: Message[]; sessionId?: string } = await req.json();
     const { messages, sessionId: clientSessionId } = body;
     const chatSessionId = clientSessionId || `session_${Date.now()}`;
 
@@ -132,7 +133,7 @@ EXTENDED AI MEMORY (Do not explicitly mention you are reading this unless releva
 CURRENT DATE: ${currentDate}
 
 USER PROFILE:
-- Name: ${(user as any).firstName || 'Unknown'}
+- Name: ${user.firstName || 'Unknown'}
 - Birth Date: ${au.birth_date || 'Not provided'}
 - Birth Time: ${au.birth_time || 'Not provided'}
 - Birth Location: ${au.birth_location || 'Not provided'}
@@ -175,8 +176,7 @@ TOOLS:
     );
 
     const result = await streamTextWithFallback({
-        // @ts-ignore
-        onFinish: async (event: any) => {
+        onFinish: async (event) => {
             // Save conversation memory to Supabase
             try {
                 // Append AI's response
@@ -194,7 +194,7 @@ TOOLS:
                 // Auto-generate summary only if no existing one
                 let summary = existing?.summary;
                 if (!summary) {
-                    const firstUserMsg = messages.find((m: any) => m.role === 'user')?.content || '';
+                    const firstUserMsg = messages.find((m) => m.role === 'user')?.content || '';
                     summary = firstUserMsg.slice(0, 50) + (firstUserMsg.length > 50 ? '...' : '');
                 }
 
@@ -231,7 +231,7 @@ TOOLS:
                             info: "Successfully calculated Fusion Chart. Check strategic context for detailed Bazi + Ziwei cross-validated synthesis.",
                             strategicContext: chart.fusionContext,
                         };
-                    } catch (e) {
+                    } catch {
                         return { error: 'Invalid date/time format or calculation failed.' };
                     }
                 },
@@ -304,8 +304,8 @@ TOOLS:
     });
 
     return result.toDataStreamResponse({
-            getErrorMessage: (error: any) => {
-                const message = error?.message || String(error);
+            getErrorMessage: (error: unknown) => {
+                const message = getErrorMessage(error);
                 console.error('[AI Stream Internal Error]', error);
                 return `Server Stream Crash: ${message}`;
             }
