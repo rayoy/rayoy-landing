@@ -1,6 +1,9 @@
 'use client';
 
+import { useLanguage } from '@/lib/LanguageContext';
+
 export default function Logo() {
+    const { t } = useLanguage();
     return (
         <svg
             width="36"
@@ -8,7 +11,7 @@ export default function Logo() {
             viewBox="0 0 36 36"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            aria-label="Timing logo"
+            aria-label={`${t.brand} logo`}
         >
             {/* Orbit ring */}
             <ellipse

@@ -46,7 +46,7 @@ export default function Navbar() {
                 <Link href="/" className="flex items-center gap-2.5 group">
                     <Logo />
                     <span className="text-lg font-semibold tracking-tight text-brand-text transition-colors group-hover:text-brand-accent">
-                        Timing
+                        {t.brand}
                     </span>
                 </Link>
 

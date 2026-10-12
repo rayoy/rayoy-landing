@@ -1,7 +1,10 @@
 'use client';
 
+import { useLanguage } from '@/lib/LanguageContext';
+
 
 export default function Footer() {
+    const { t } = useLanguage();
     return (
         <footer className="border-t border-brand-border px-6 py-12">
             <div className="mx-auto max-w-6xl text-center flex flex-col items-center">
@@ -15,7 +18,7 @@ export default function Footer() {
                 <a href="mailto:support@rayoy.com" className="text-sm text-brand-muted hover:text-brand-accent transition-colors mb-4">
                     support@rayoy.com
                 </a>
-                <p className="text-sm text-brand-muted">Timing · © 2026 Rayoy. All rights reserved.</p>
+                <p className="text-sm text-brand-muted">{t.brand} · © 2026 Rayoy. All rights reserved.</p>
             </div>
         </footer>
     );

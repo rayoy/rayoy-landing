@@ -1,6 +1,7 @@
 export type Locale = 'en' | 'zh-CN' | 'zh-TW';
 
 export interface Translations {
+    brand: string;
     nav: {
         howItWorks: string;
         pricing: string;
@@ -61,6 +62,7 @@ export interface Translations {
 
 export const translations: Record<Locale, Translations> = {
     en: {
+        brand: 'Timing',
         nav: {
             howItWorks: 'How It Works',
             pricing: 'Pricing',
@@ -143,6 +145,7 @@ export const translations: Record<Locale, Translations> = {
         },
     },
     'zh-CN': {
+        brand: '时机 · Timing',
         nav: {
             howItWorks: '工作原理',
             pricing: '定价',
@@ -152,7 +155,7 @@ export const translations: Record<Locale, Translations> = {
         hero: {
             headline: '决策，先看节奏。',
             subheadline:
-                'Timing 通过周期模型分析你的阶段位置与三年趋势，帮助你判断扩张、收缩或转向的时机。',
+                '时机 · Timing 通过周期模型分析你的阶段位置与三年趋势，帮助你判断扩张、收缩或转向的时机。',
             ctaPrimary: '获取三年周期分析',
             ctaSecondary: '了解方法论',
         },
@@ -203,11 +206,11 @@ export const translations: Record<Locale, Translations> = {
             items: [
                 {
                     q: '这是算命吗？',
-                    a: 'Timing 不是算命工具。它是一个基于周期模型的结构化分析框架，不预测未来，而是识别时机规律以辅助决策。',
+                    a: '时机 · Timing 不是算命工具。它是一个基于周期模型的结构化分析框架，不预测未来，而是识别时机规律以辅助决策。',
                 },
                 {
                     q: '准确度如何？',
-                    a: 'Timing 基于历史周期模式提供概率性分析，是决策辅助工具，不保证结果。准确性取决于输入数据质量和应用场景。',
+                    a: '时机 · Timing 基于历史周期模式提供概率性分析，是决策辅助工具，不保证结果。准确性取决于输入数据质量和应用场景。',
                 },
                 {
                     q: '适合谁使用？',
@@ -215,7 +218,7 @@ export const translations: Record<Locale, Translations> = {
                 },
                 {
                     q: '这是投资建议吗？',
-                    a: 'Timing 不是财务咨询服务，而是战略分析工具。所有决策由你自己负责。如需财务、法律或医疗建议，请咨询专业人士。',
+                    a: '时机 · Timing 不是财务咨询服务，而是战略分析工具。所有决策由你自己负责。如需财务、法律或医疗建议，请咨询专业人士。',
                 },
             ],
         },
@@ -225,6 +228,7 @@ export const translations: Record<Locale, Translations> = {
         },
     },
     'zh-TW': {
+        brand: '時機 · Timing',
         nav: {
             howItWorks: '工作原理',
             pricing: '定價',
@@ -234,7 +238,7 @@ export const translations: Record<Locale, Translations> = {
         hero: {
             headline: '決策，先看節奏。',
             subheadline:
-                'Timing 透過週期模型分析你的階段位置與三年趨勢，幫助你判斷擴張、收縮或轉向的時機。',
+                '時機 · Timing 透過週期模型分析你的階段位置與三年趨勢，幫助你判斷擴張、收縮或轉向的時機。',
             ctaPrimary: '取得三年週期分析',
             ctaSecondary: '了解方法論',
         },
@@ -285,11 +289,11 @@ export const translations: Record<Locale, Translations> = {
             items: [
                 {
                     q: '這是算命嗎？',
-                    a: 'Timing 不是算命工具。它是一個基於週期模型的結構化分析框架，不預測未來，而是識別時機規律以輔助決策。',
+                    a: '時機 · Timing 不是算命工具。它是一個基於週期模型的結構化分析框架，不預測未來，而是識別時機規律以輔助決策。',
                 },
                 {
                     q: '準確度如何？',
-                    a: 'Timing 基於歷史週期模式提供概率性分析，是決策輔助工具，不保證結果。準確性取決於輸入數據品質和應用場景。',
+                    a: '時機 · Timing 基於歷史週期模式提供概率性分析，是決策輔助工具，不保證結果。準確性取決於輸入數據品質和應用場景。',
                 },
                 {
                     q: '適合誰使用？',
@@ -297,7 +301,7 @@ export const translations: Record<Locale, Translations> = {
                 },
                 {
                     q: '這是投資建議嗎？',
-                    a: 'Timing 不是財務諮詢服務，而是戰略分析工具。所有決策由你自己負責。如需財務、法律或醫療建議，請諮詢專業人士。',
+                    a: '時機 · Timing 不是財務諮詢服務，而是戰略分析工具。所有決策由你自己負責。如需財務、法律或醫療建議，請諮詢專業人士。',
                 },
             ],
         },

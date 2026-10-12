@@ -12,7 +12,7 @@ export default function DashboardLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const { ta } = useLanguage();
+    const { ta, t: shared } = useLanguage();
     const t = ta.dashboardLayout;
     const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -22,7 +22,7 @@ export default function DashboardLayout({
             <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-gray-800 bg-gray-950">
                 <div className="flex items-center gap-2">
                     <Logo />
-                    <span className="text-lg font-bold tracking-wider">TIMING</span>
+                    <span className="text-lg font-bold tracking-wider">{shared.brand}</span>
                 </div>
                 <button
                     onClick={() => setMobileOpen(!mobileOpen)}
@@ -37,7 +37,7 @@ export default function DashboardLayout({
                 {/* Desktop Logo (hidden on mobile since we have the mobile header) */}
                 <div className="hidden md:flex items-center space-x-3 mb-10">
                     <Logo />
-                    <span className="text-xl font-bold tracking-wider">TIMING</span>
+                    <span className="text-xl font-bold tracking-wider">{shared.brand}</span>
                 </div>
 
                 <nav className="flex-1 space-y-2">
